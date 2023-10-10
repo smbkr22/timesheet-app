@@ -9,19 +9,20 @@ export interface NavItem {
 
 export type DailyLog = {
   createdAt: string;
-  initiativeName: string;
-  taskName: string;
+  memberTaskId: string;
+  initiativeId: string;
+  taskId: string;
   description?: string;
-  workHour: string;
+  workHours: string;
   error: boolean;
   isSaved: boolean;
 };
 
 export type WeeklyTableRow = {
   createdAt: Date;
-  id: string;
-  initiativeName: string;
-  taskName: string;
+  memberTaskId: string;
+  initiativeId: string;
+  taskId: string;
   mon: string;
   tues: string;
   wed: string;

@@ -5,6 +5,18 @@ const factory = require('./handlerFactory');
 
 exports.getAllTasks = factory.getAll(Task);
 
+exports.getTask = catchAsync(async (req, res, next) => {
+    const id = req.params.id;
+    const task = await Task.findAll({ where: { taskId: id } });
+
+    res.status(200).json({
+        status: 'success',
+        data: {
+            task,
+        },
+    });
+});
+
 exports.getTaskByInitiative = catchAsync(async (req, res, next) => {
     const id = req.params.id;
     const tasks = await Task.findAll({ where: { initiativeId: id } });
@@ -34,6 +46,7 @@ exports.createTask = catchAsync(async (req, res, next) => {
     await MemberTask.create({
         taskId: task.taskId,
         userId: req.body.userId,
+        initiativeId: initiative.initiativeId,
     });
 
     res.status(201).json({

@@ -29,6 +29,8 @@ const fetchManagerInitiative = async (auth: any) => {
 
 const ManagerInitiatives = () => {
   const [open, setOpen] = useState(false);
+  const [accordionState, setAccordionState] = useState("");
+
   const [selectedInitiativeName, setSelectedInitiativeName] = useState("");
   const [selectedInitiativeId, setSelectedInitiativeId] = useState("");
   const { auth } = useAuth();
@@ -50,10 +52,20 @@ const ManagerInitiatives = () => {
               className="grid content-between"
             >
               <CardHeader>
-                <Accordion type="single" collapsible className="relative">
-                  <AccordionItem value="value-1">
+                <Accordion
+                  type="single"
+                  collapsible
+                  className="relative"
+                  value={accordionState}
+                  onValueChange={setAccordionState}
+                >
+                  <AccordionItem value={initiative.initiativeName}>
                     <div className="grid grid-cols-[1fr,auto] gap-4 items-center">
-                      <AccordionTrigger>
+                      <AccordionTrigger
+                        onClick={() =>
+                          setAccordionState(initiative.initiativeName)
+                        }
+                      >
                         <CardTitle className="text-2xl tracking-wide uppercase">
                           {initiative.initiativeName}
                         </CardTitle>

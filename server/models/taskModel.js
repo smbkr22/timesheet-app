@@ -23,10 +23,14 @@ module.exports = (sequelize, DataTypes) => {
         Task.belongsTo(models.Initiative, {
             foreignKey: 'initiativeId',
         });
-        Task.belongsToMany(models.User, {
-            through: 'MemberTask',
+        Task.belongsToMany(models.Initiative, {
+            through: 'InitiativeTask',
             foreignKey: 'taskId',
         });
+        // Task.belongsToMany(models.User, {
+        //     through: 'MemberTask',
+        //     foreignKey: 'taskId',
+        // });
     };
 
     return Task;

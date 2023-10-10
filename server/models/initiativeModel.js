@@ -29,10 +29,14 @@ module.exports = (sequelize, DataTypes) => {
             onDelete: 'cascade',
             foreignKey: 'initiativeId',
         });
-        Initiative.belongsToMany(models.User, {
-            through: 'InitiativeMember',
+        Initiative.belongsToMany(models.Task, {
+            through: 'InitiativeTask',
             foreignKey: 'initiativeId',
         });
+        // Initiative.belongsToMany(models.User, {
+        //     through: 'InitiativeMember',
+        //     foreignKey: 'initiativeId',
+        // });
         // Initiative.belongsToMany(models.User, {
         //     through: 'MemberTask',
         //     foreignKey: 'initiativeId',

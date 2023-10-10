@@ -12,38 +12,27 @@ exports.getAllMemberTasks = catchAsync(async (req, res, next) => {
 });
 
 exports.getMemberTasksByUser = catchAsync(async (req, res, next) => {
-    const tasks = await MemberTask.findAll({
+    const memberTasks = await MemberTask.findAll({
         where: { userId: req.user.dataValues.userId },
     });
 
-    // res.status(200).json({
-    //     status: 'success',
-    //     result: tasks.length,
-    //     data: { tasks },
-    // });
-
-    req.tasks = tasks;
-
-    next();
+    res.status(200).json({
+        status: 'success',
+        result: memberTasks.length,
+        data: { memberTasks },
+    });
 });
 
 exports.getInitiativesByMemberTasks = catchAsync(async (req, res, next) => {
-    const taskIds = req.tasks.map((task) => task.taskId);
+    const memberTasks = await MemberTask.findAll({
+        where: { userId: req.user.dataValues.userId },
+    });
 
-    const initiativesIds = await Promise.all(
-        taskIds.map(async (taskId) => {
-            const initiativesId = await Task.findByPk(taskId, {
-                attributes: ['initiativeId'],
-            });
-            return initiativesId;
-        })
-    );
+    const initiativeIds = memberTasks.map((task) => task.initiativeId);
 
     const initiatives = await Promise.all(
-        initiativesIds.map(async (initiativeId) => {
-            const initiative = await Initiative.findByPk(
-                initiativeId.dataValues.initiativeId
-            );
+        initiativeIds.map(async (initiativeId) => {
+            const initiative = await Initiative.findByPk(initiativeId);
             return initiative;
         })
     );
@@ -66,7 +55,11 @@ exports.getInitiativesByMemberTasks = catchAsync(async (req, res, next) => {
 });
 
 exports.getTasksByMemberTasks = catchAsync(async (req, res, next) => {
-    const taskIds = req.tasks.map((task) => task.taskId);
+    const memberTasks = await MemberTask.findAll({
+        where: { userId: req.user.dataValues.userId },
+    });
+
+    const taskIds = memberTasks.map((task) => task.taskId);
 
     const tasks = await Promise.all(
         taskIds.map(async (taskId) => {
@@ -92,5 +85,18 @@ exports.createMemberTask = catchAsync(async (req, res, next) => {
         data: {
             memberTask,
         },
+    });
+});
+
+exports.deleteMemberTask = catchAsync(async (req, res, next) => {
+    const id = req.params.id;
+
+    const memberTask = await MemberTask.destroy({
+        where: { memberTaskId: id },
+    });
+
+    res.status(204).json({
+        status: 'success',
+        msg: 'Member Task has been deleted',
     });
 });

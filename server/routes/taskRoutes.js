@@ -66,6 +66,30 @@ const router = express.Router();
  *               $ref: "#/components/schemas/Task"
  */
 
+/**
+ * @swagger
+ * /tasks/{id}:
+ *   get:
+ *     summary: Get a task by ID
+ *     tags: [Tasks]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Task
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Task details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Task'
+ */
+
 router
     .route('/initiatives/:id')
     .get(authController.protect, taskController.getTaskByInitiative);
@@ -78,5 +102,7 @@ router
         authController.restrictTo('admin', 'manager'),
         taskController.createTask
     );
+
+router.route('/:id').get(authController.protect, taskController.getTask);
 
 module.exports = router;

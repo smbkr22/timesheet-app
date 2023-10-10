@@ -35,7 +35,7 @@ type WeeklyLogTableRowProps = {
     rowIndex: number,
     col: keyof WeeklyTableRow
   ) => void;
-  handleDeleteTask: (rowID: number) => void;
+  handleDeleteTask: (rowID: string) => void;
 
   submitClicked: boolean;
 };
@@ -47,8 +47,8 @@ const fetchAllInitiatives = async (auth: AuthInfo) => {
   return data;
 };
 
-const fetchAllTasks = async (auth: AuthInfo, id: string) => {
-  const { data } = await axios.get(`/tasks/initiatives/${id}`, {
+const fetchAllTasks = async (auth: AuthInfo) => {
+  const { data } = await axios.get(`/tasks`, {
     headers: { Authorization: `Bearer ${auth?.token}` },
   });
 
@@ -59,24 +59,34 @@ const WeeklyLogTableRow = (props: WeeklyLogTableRowProps) => {
   const { rows, row, rowIndex, handleChange, handleDeleteTask, submitClicked } =
     props;
 
-  const [selectedInitiativeId, setSelectedInitiativeId] = useState("");
+  // const [selectedInitiativeId, setSelectedInitiativeId] = useState(
+  //   row.initiativeId
+  // );
+  // const [selectedTaskId, setSelectedTaskId] = useState(row.taskId);
+
   const { auth } = useAuth();
   const { data: initiatives } = useQuery(["GET-MEMBER-INITIATIVES"], () =>
     fetchAllInitiatives(auth)
   );
   const { data: tasks } = useQuery(
-    ["GET-INITIATIVE-TASKS", selectedInitiativeId],
-    () => fetchAllTasks(auth, selectedInitiativeId),
-    { enabled: !!selectedInitiativeId }
+    ["GET-ALL-TASKS"],
+    () => fetchAllTasks(auth),
+    {
+      select: (data) =>
+        data?.data.filter(
+          (task: Task) => task.initiativeId === row.initiativeId
+        ),
+    }
   );
 
   return (
     <TableRow>
       <TableCell>
         <Select
+          value={row.initiativeId}
           onValueChange={(value) => {
-            setSelectedInitiativeId(value);
-            handleChange(value, rowIndex, "initiativeName");
+            // setSelectedInitiativeId(value);
+            handleChange(value, rowIndex, "initiativeId");
           }}
         >
           <SelectTrigger className="capitalize w-80">
@@ -98,13 +108,17 @@ const WeeklyLogTableRow = (props: WeeklyLogTableRowProps) => {
 
       <TableCell>
         <Select
-          onValueChange={(value) => handleChange(value, rowIndex, "taskName")}
+          value={row.taskId}
+          onValueChange={(value) => {
+            // setSelectedTaskId(value);
+            handleChange(value, rowIndex, "taskId");
+          }}
         >
           <SelectTrigger className="capitalize w-80">
             <SelectValue placeholder="Select Task" />
           </SelectTrigger>
           <SelectContent>
-            {tasks?.data.tasks.map((task: Task) => (
+            {tasks?.map((task: Task) => (
               <SelectItem
                 key={task.taskId}
                 value={task.taskId}
@@ -227,6 +241,7 @@ const WeeklyLogTableRow = (props: WeeklyLogTableRowProps) => {
                 className={buttonVariants({
                   variant: "default",
                 })}
+                onClick={() => handleDeleteTask(row.memberTaskId)}
               >
                 <Icons.check />
                 Confirm

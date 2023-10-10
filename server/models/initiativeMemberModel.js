@@ -36,6 +36,15 @@ module.exports = (sequelize, DataTypes) => {
         }
     );
 
+    InitiativeMember.associate = (models) => {
+        InitiativeMember.belongsTo(models.User, {
+            foreignKey: 'userId',
+        });
+        InitiativeMember.belongsTo(models.Initiative, {
+            foreignKey: 'initiativeId',
+        });
+    };
+
     // InitiativeMember.beforeCreate(async (initiativeMember) => {
     //     try {
     //         const now = new Date();

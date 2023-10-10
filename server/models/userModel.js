@@ -78,18 +78,18 @@ module.exports = (sequelize, DataTypes) => {
             through: 'UserRole',
             foreignKey: 'userId',
         });
-        User.belongsToMany(models.Initiative, {
-            through: 'InitiativeMember',
-            foreignKey: 'userId',
-        });
+        // User.belongsToMany(models.Initiative, {
+        //     through: 'InitiativeMember',
+        //     foreignKey: 'userId',
+        // });
         // User.belongsToMany(models.Initiative, {
         //     through: 'MemberTask',
         //     foreignKey: 'userId',
         // });
-        User.belongsToMany(models.Task, {
-            through: 'MemberTask',
-            foreignKey: 'userId',
-        });
+        // User.belongsToMany(models.Task, {
+        //     through: 'MemberTask',
+        //     foreignKey: 'userId',
+        // });
     };
 
     return User;

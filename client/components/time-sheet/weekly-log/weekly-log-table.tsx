@@ -1,8 +1,20 @@
 import { useCallback, useEffect, useState } from "react";
+import axios from "@/api/axios";
 import { ColumnTotals, WeeklyTableRow } from "@/types";
+import moment from "moment";
 import uuid from "react-uuid";
+import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
+import useAuth from "@/hooks/useAuth";
+import { Button, buttonVariants } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -19,18 +31,20 @@ import WeeklyLogTableRow from "./weekly-log-table-row";
 type WeeklyLogTableProps = {
   daysOfWeek: Date[];
   weekFirstDate: Date;
+  memberTasks: WeeklyTableRow[];
 };
 
 const WeeklyLogTable = (props: WeeklyLogTableProps) => {
-  const { daysOfWeek, weekFirstDate } = props;
+  const { daysOfWeek, weekFirstDate, memberTasks } = props;
+  const { auth } = useAuth();
 
   const [submitClicked, setSubmitClicked] = useState(false);
   const [rows, setRows] = useState<WeeklyTableRow[]>([]);
   const [newRow, setNewRow] = useState<WeeklyTableRow>({
     createdAt: weekFirstDate,
-    id: uuid(),
-    initiativeName: "",
-    taskName: "",
+    memberTaskId: uuid(),
+    initiativeId: "",
+    taskId: "",
     mon: "",
     tues: "",
     wed: "",
@@ -43,13 +57,35 @@ const WeeklyLogTable = (props: WeeklyLogTableProps) => {
     isSaved: false,
   });
 
+  useEffect(() => {
+    setRows(memberTasks);
+  }, [memberTasks, weekFirstDate]);
+  useEffect(() => {
+    setNewRow({
+      createdAt: weekFirstDate,
+      memberTaskId: uuid(),
+      initiativeId: "",
+      taskId: "",
+      mon: "",
+      tues: "",
+      wed: "",
+      thurs: "",
+      fri: "",
+      sat: "",
+      sun: "",
+      total: "00:00",
+      error: false,
+      isSaved: false,
+    });
+  }, [weekFirstDate]);
+
   const handleAddRow = () => {
     setRows([...rows, newRow]);
     setNewRow({
       createdAt: weekFirstDate,
-      id: uuid(),
-      initiativeName: "",
-      taskName: "",
+      memberTaskId: uuid(),
+      initiativeId: "",
+      taskId: "",
       mon: "",
       tues: "",
       wed: "",
@@ -63,6 +99,144 @@ const WeeklyLogTable = (props: WeeklyLogTableProps) => {
     });
   };
 
+  const deleteBeforeSave = async (
+    createdAtDate: string,
+    updatedRows: WeeklyTableRow[]
+  ) => {
+    try {
+      const response = await axios.get("/memberTasks", {
+        headers: { Authorization: `Bearer ${auth?.token}` },
+      });
+
+      if (response.status !== 200) {
+        throw new Error("Failed to fetch data from the server.");
+      }
+
+      const data = response.data;
+
+      const startDate = new Date(createdAtDate);
+      startDate.setDate(startDate.getDate() - startDate.getDay() + 1);
+      const endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 6);
+
+      const filteredData = data?.data.memberTasks.filter((item: any) => {
+        const itemDate = moment(item.createdAt);
+        const startMoment = moment(startDate);
+        const endMoment = moment(endDate);
+
+        return (
+          itemDate.isSameOrAfter(startMoment, "day") &&
+          itemDate.isSameOrBefore(endMoment, "day")
+        );
+      });
+
+      for (const item of filteredData) {
+        const deleteResponse = await axios.delete(
+          `memberTasks/${item.memberTaskId}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${auth?.token}`,
+            },
+          }
+        );
+
+        // if (deleteResponse.status !== 204) {
+        //   throw new Error("Failed to delete object from the server.");
+        // }
+      }
+
+      postSave(convertObjects(updatedRows));
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const postSave = async (
+    data: {
+      createdAt: string;
+      memberTaskId: string;
+      initiativeId: string;
+      taskId: string;
+      description: string;
+      workHours: string;
+      error: boolean;
+      isSaved: boolean;
+    }[]
+  ) => {
+    const promises = data.map((row) => {
+      return axios
+        .post("/memberTasks", row, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${auth?.token}`,
+          },
+        })
+        .then((res) => console.log(res.status))
+        .catch((err) => console.log(err.message));
+    });
+
+    try {
+      await Promise.all(promises);
+      console.log("All requests completed successfully.");
+    } catch (error) {
+      console.error("One or more requests failed:", error);
+    }
+  };
+
+  const convertObjects = (updatedRows: WeeklyTableRow[]) => {
+    const daysOfWeek: Array<keyof WeeklyTableRow> = [
+      "mon",
+      "tues",
+      "wed",
+      "thurs",
+      "fri",
+      "sat",
+      "sun",
+    ];
+    const convertedObjects = updatedRows.flatMap((row) =>
+      daysOfWeek.reduce(
+        (
+          acc: {
+            memberTaskId: string;
+            userId: string;
+            initiativeId: string;
+            taskId: string;
+            description: string;
+            workHours: string;
+            createdAt: string;
+            error: boolean;
+            isSaved: boolean;
+          }[],
+          day,
+          index
+        ) => {
+          if (row[day] !== "" && row[day] !== null) {
+            const dayNumber = index + 1;
+            const date = new Date(row.createdAt);
+            date.setDate(date.getDate() + dayNumber - date.getDay());
+
+            acc.push({
+              createdAt: date.toISOString(),
+              memberTaskId: uuid(),
+              userId: auth.user.userId,
+              initiativeId: row.initiativeId,
+              taskId: row.taskId,
+              description: "",
+              workHours: row[day],
+              error: row.error,
+              isSaved: row.isSaved,
+            });
+          }
+          return acc;
+        },
+        []
+      )
+    );
+
+    return convertedObjects;
+  };
+
   const handleChange = (
     value: string | null,
     rowIndex: number,
@@ -71,16 +245,105 @@ const WeeklyLogTable = (props: WeeklyLogTableProps) => {
     const updatedRows = [...rows];
 
     if (value === "Holiday") {
-      updatedRows[rowIndex].taskName = value;
+      updatedRows[rowIndex].taskId = value;
     }
 
     updatedRows[rowIndex] = { ...updatedRows[rowIndex], [columnKey]: value };
 
-    if (columnKey !== "initiativeName" && columnKey !== "taskName") {
+    if (columnKey !== "initiativeId" && columnKey !== "taskId") {
       updatedRows[rowIndex].total = calculateRowTotal(updatedRows[rowIndex]);
     }
     setRows(updatedRows);
     calculateColumnTotals();
+  };
+
+  const handleSave = () => {
+    const updatedRows = rows.map((row) => {
+      if (row.initiativeId && row.taskId) {
+        if (
+          row.mon ||
+          row.tues ||
+          row.wed ||
+          row.thurs ||
+          row.fri ||
+          row.sat ||
+          row.sun
+        ) {
+          return {
+            ...row,
+            error: false,
+          };
+        } else {
+          return {
+            ...row,
+            error: true,
+          };
+        }
+      } else {
+        return {
+          ...row,
+        };
+      }
+    });
+
+    setRows(updatedRows);
+
+    // const rowsHasErrors = updatedRows.some((row) => row.error === true);
+    // if (!rowsHasErrors) {
+    //   toast.success("Saved Successfully!");
+    // } else {
+    //   toast.error("Error");
+    //   return;
+    // }
+
+    const date = weekFirstDate.toISOString();
+    deleteBeforeSave(date, updatedRows);
+  };
+
+  const handleSubmit = () => {
+    const updatedRows = rows.map((row) => {
+      if (row.initiativeId && row.taskId) {
+        if (
+          row.mon ||
+          row.tues ||
+          row.wed ||
+          row.thurs ||
+          row.fri ||
+          row.sat ||
+          row.sun
+        ) {
+          return {
+            ...row,
+            error: false,
+          };
+        } else {
+          return {
+            ...row,
+            error: true,
+          };
+        }
+      } else {
+        return {
+          ...row,
+        };
+      }
+    });
+
+    setRows(updatedRows);
+    setSubmitClicked(true);
+
+    const rowsHasErrors = updatedRows.some((row) => row.error === true);
+    if (!rowsHasErrors) {
+      toast.success("Submitted Successfully!");
+    } else {
+      toast.error("Error");
+      return;
+    }
+
+    const date = weekFirstDate.toISOString();
+    deleteBeforeSave(date).then(() => {
+      postSave(convertObjects(updatedRows));
+    });
   };
 
   const calculateRowTotal = useCallback((row: WeeklyTableRow) => {
@@ -160,7 +423,73 @@ const WeeklyLogTable = (props: WeeklyLogTableProps) => {
     return `${formattedHours}:${formattedMinutes}`;
   };
 
-  const handleDeleteTask = () => {};
+  async function deleteDataBasedOnDate(
+    deleteTask: WeeklyTableRow,
+    createdAtDate: string
+  ) {
+    try {
+      const response = await axios.get("/memberTasks", {
+        headers: { Authorization: `Bearer ${auth?.token}` },
+      });
+
+      const data = response.data;
+
+      const startDate = new Date(createdAtDate);
+      startDate.setDate(startDate.getDate() - startDate.getDay() + 1);
+      const endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 6);
+
+      const filteredData = data.filter(
+        (item: {
+          createdAt: Date;
+          memberTaskId: string;
+          initiativeId: string;
+          taskId: string;
+          description: string;
+          workHour: string;
+          error: boolean;
+          isSaved: boolean;
+        }) => {
+          const itemDate = new Date(item.createdAt);
+          return (
+            itemDate >= startDate &&
+            itemDate <= endDate &&
+            item.initiativeId === deleteTask.initiativeId &&
+            item.taskId === deleteTask.taskId
+          );
+        }
+      );
+
+      for (const item of filteredData) {
+        const deleteResponse = await axios.delete(`/memberTasks/${item.id}`, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${auth?.token}`,
+          },
+        });
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  const handleDeleteTask = (rowID: string) => {
+    const updatedRows = [...rows];
+    const index = rows.findIndex((row) => row?.memberTaskId === rowID);
+
+    const deleteTask = updatedRows[index];
+    const createdAtDate = weekFirstDate.toISOString();
+
+    deleteDataBasedOnDate(deleteTask, createdAtDate)
+      .then(() => {
+        console.log("Objects deleted successfully.");
+        updatedRows.splice(index, 1);
+        setRows(updatedRows);
+      })
+      .catch((error) => console.error("Error:", error));
+  };
+
+  console.log("rows", rows);
 
   return (
     <form className="w-full">
@@ -246,12 +575,40 @@ const WeeklyLogTable = (props: WeeklyLogTableProps) => {
 
       <div className="flex gap-4 px-1 mt-4 [&>button]:font-bold">
         <Button type="button" onClick={handleAddRow}>
-          <Icons.plus /> Add
+          <Icons.plus size={16} /> Add
         </Button>
-        <Button type="button" variant={"outline"}>
+        <Button type="button" variant={"outline"} onClick={handleSave}>
           Save
         </Button>
-        <Button type="button">Submit</Button>
+        <Dialog>
+          <DialogTrigger className={buttonVariants({ variant: "default" })}>
+            Submit
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Do you want to submit the task ?</DialogTitle>
+            </DialogHeader>
+            <DialogFooter className="flex justify-center gap-4 mt-4">
+              <DialogTrigger
+                className={buttonVariants({
+                  variant: "outline",
+                })}
+              >
+                <Icons.x />
+                Cancel
+              </DialogTrigger>
+              <DialogTrigger
+                className={buttonVariants({
+                  variant: "default",
+                })}
+                onClick={handleSubmit}
+              >
+                <Icons.check />
+                Confirm
+              </DialogTrigger>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </form>
   );

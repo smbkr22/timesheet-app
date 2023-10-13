@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import axios from "@/api/axios";
 import { Initiative } from "@/types";
 import { useQuery } from "@tanstack/react-query";
@@ -13,7 +14,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import AddInitiativeTaskForm from "@/components/forms/add-initiative-task-form";
@@ -31,9 +32,10 @@ const ManagerInitiatives = () => {
   const [open, setOpen] = useState(false);
   const [accordionState, setAccordionState] = useState("");
 
-  const [selectedInitiativeName, setSelectedInitiativeName] = useState("");
   const [selectedInitiativeId, setSelectedInitiativeId] = useState("");
+  const [selectedInitiativeName, setSelectedInitiativeName] = useState("");
   const { auth } = useAuth();
+  const router = useRouter();
   const { data: initiatives } = useQuery(["GET-MANAGER-INITIATIVES"], () =>
     fetchManagerInitiative(auth)
   );
@@ -60,7 +62,7 @@ const ManagerInitiatives = () => {
                   onValueChange={setAccordionState}
                 >
                   <AccordionItem value={initiative.initiativeName}>
-                    <div className="grid grid-cols-[1fr,auto] gap-4 items-center">
+                    <div className="grid grid-cols-[1fr,auto,auto] gap-4 items-center">
                       <AccordionTrigger
                         onClick={() =>
                           setAccordionState(initiative.initiativeName)
@@ -70,6 +72,16 @@ const ManagerInitiatives = () => {
                           {initiative.initiativeName}
                         </CardTitle>
                       </AccordionTrigger>
+                      <Button
+                        onClick={() =>
+                          router.push(
+                            `/assign-users?initiativeId=${initiative.initiativeId}&initiativeName=${initiative.initiativeName}`
+                          )
+                        }
+                        variant={"outline"}
+                      >
+                        Assign User
+                      </Button>
                       <Dialog open={open} onOpenChange={setOpen}>
                         <DialogTrigger
                           onClick={() => {
@@ -83,7 +95,7 @@ const ManagerInitiatives = () => {
                             size: "sm",
                           })}
                         >
-                          <Icons.plus /> Create task
+                          <Icons.plus size={16} /> Assign task
                         </DialogTrigger>
                         <DialogContent>
                           <AddInitiativeTaskForm

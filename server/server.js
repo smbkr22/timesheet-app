@@ -12,7 +12,7 @@ const port = process.env.PORT || 8080;
 
 const db = require('./models');
 db.sequelize
-    .sync({ force: true })
+    .sync()
     .then(() => {
         app.listen(port, () => {
             console.log(`App is listening on ${port}`);

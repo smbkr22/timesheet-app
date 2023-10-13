@@ -10,6 +10,8 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
+import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
+
 const REGISTER_URL = "users/signup";
 
 type RegisterUserProps = {
@@ -109,30 +111,24 @@ const RegisterUser = (props: RegisterUserProps) => {
       </div>
       <div className="w-full space-y-2">
         <Label>Role</Label>
-        <div className="flex flex-row gap-4">
-          <Label htmlFor="user">
-            <input {...register("role")} type="radio" value="user" id="user" />
-            User
-          </Label>
-          <Label htmlFor="manager">
-            <input
+        <RadioGroup defaultValue="user" className="flex gap-3">
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem {...register("role")} value="user" id="user" />
+            <Label htmlFor="user">User</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem
               {...register("role")}
-              type="radio"
               value="manager"
               id="manager"
             />
-            Manager
-          </Label>
-          <Label htmlFor="admin">
-            <input
-              {...register("role")}
-              type="radio"
-              value="admin"
-              id="admin"
-            />
-            Admin
-          </Label>
-        </div>
+            <Label htmlFor="manager">Manager</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem {...register("role")} value="admin" id="admin" />
+            <Label htmlFor="admin">Admin</Label>
+          </div>
+        </RadioGroup>
         {errors.contactNumber && (
           <p className="text-sm text-red-600">{`${errors.contactNumber.message}`}</p>
         )}

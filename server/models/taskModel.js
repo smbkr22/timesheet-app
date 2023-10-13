@@ -9,9 +9,11 @@ module.exports = (sequelize, DataTypes) => {
         taskName: {
             type: DataTypes.STRING,
             allowNull: false,
+            unique: true,
         },
         taskDescription: {
             type: DataTypes.STRING,
+            allowNull: false,
         },
         createdBy: {
             type: DataTypes.STRING,
@@ -20,12 +22,10 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     Task.associate = (models) => {
-        Task.belongsTo(models.Initiative, {
-            foreignKey: 'initiativeId',
-        });
         Task.belongsToMany(models.Initiative, {
             through: 'InitiativeTask',
             foreignKey: 'taskId',
+            onDelete: 'CASCADE',
         });
         // Task.belongsToMany(models.User, {
         //     through: 'MemberTask',

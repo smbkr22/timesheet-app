@@ -92,7 +92,7 @@ const router = express.Router();
 
 router
     .route('/initiatives/:id')
-    .get(authController.protect, taskController.getTaskByInitiative);
+    .get(authController.protect, taskController.getTasksByInitiative);
 
 router
     .route('/')

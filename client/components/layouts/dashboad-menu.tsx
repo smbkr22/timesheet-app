@@ -8,6 +8,8 @@ import dynamicIconImports from "lucide-react/dynamicIconImports";
 import { dashboardConfig } from "@/config/dashboard";
 import useAuth from "@/hooks/useAuth";
 
+import { Icons } from "../icons";
+
 const DashboardMenu = () => {
   const { auth } = useAuth();
 
@@ -26,20 +28,32 @@ const DashboardMenu = () => {
         }}
       >
         <ul className="mt-16 text-lg">
-          {roleBasedDashboardOptions.map((option: SideBarNavItems) => {
-            const LucideIcon = dynamic(dynamicIconImports[option.icon]);
-            return (
-              <li key={option.title}>
-                <Link
-                  href={option.href}
-                  className="flex items-center gap-3 px-10 py-4 capitalize cursor-pointer hover:bg-popover"
-                >
-                  {/* <LucideIcon /> */}
-                  {option.title}
-                </Link>
-              </li>
-            );
-          })}
+          {auth?.token ? (
+            roleBasedDashboardOptions.map((option: SideBarNavItems) => {
+              const LucideIcon = dynamic(dynamicIconImports[option.icon]);
+              return (
+                <li key={option.title}>
+                  <Link
+                    href={option.href}
+                    className="flex items-center gap-3 px-10 py-4 capitalize cursor-pointer hover:bg-popover"
+                  >
+                    {/* <LucideIcon /> */}
+                    {option.title}
+                  </Link>
+                </li>
+              );
+            })
+          ) : (
+            <li>
+              <Link
+                href={"/"}
+                className="flex items-center gap-3 px-10 py-4 capitalize cursor-pointer hover:bg-popover"
+              >
+                <Icons.home />
+                Home
+              </Link>
+            </li>
+          )}
         </ul>
       </motion.div>
     </AnimatePresence>

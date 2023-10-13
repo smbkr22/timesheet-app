@@ -341,9 +341,9 @@ const WeeklyLogTable = (props: WeeklyLogTableProps) => {
     }
 
     const date = weekFirstDate.toISOString();
-    deleteBeforeSave(date).then(() => {
-      postSave(convertObjects(updatedRows));
-    });
+    // deleteBeforeSave(date).then(() => {
+    //   postSave(convertObjects(updatedRows));
+    // });
   };
 
   const calculateRowTotal = useCallback((row: WeeklyTableRow) => {
@@ -496,8 +496,8 @@ const WeeklyLogTable = (props: WeeklyLogTableProps) => {
       <Table>
         <TableHeader>
           <TableRow className="[&>th]:font-semibold [&>th]:text-base">
-            <TableHead>Initiative Name</TableHead>
-            <TableHead>Task Name</TableHead>
+            <TableHead className="w-[375px]">Initiative Name</TableHead>
+            <TableHead className="w-[375px]">Task Name</TableHead>
             {daysOfWeek.map((day, i) => {
               const today = new Date();
               return (
@@ -520,8 +520,8 @@ const WeeklyLogTable = (props: WeeklyLogTableProps) => {
                 </TableHead>
               );
             })}
-            <TableHead className="text-center">Total</TableHead>
-            <TableHead className="text-center">Action</TableHead>
+            <TableHead className="text-center w-[84px]">Total</TableHead>
+            <TableHead className="text-center w-[84px]">Action</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

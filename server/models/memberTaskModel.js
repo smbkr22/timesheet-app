@@ -1,4 +1,4 @@
-const { User, Initiative, Task } = require('./index');
+const { User, InitiativeTask } = require('./index');
 
 module.exports = (sequelize, DataTypes) => {
     const MemberTask = sequelize.define('MemberTask', {
@@ -16,22 +16,11 @@ module.exports = (sequelize, DataTypes) => {
                 key: 'userId',
             },
         },
-        taskId: {
+        initiativeTaskId: {
             type: DataTypes.UUID,
-            allowNull: false,
-            references: {
-                model: Task,
-                key: 'taskId',
-            },
+            references: InitiativeTask,
         },
-        initiativeId: {
-            type: DataTypes.UUID,
-            allowNull: false,
-            references: {
-                model: Initiative,
-                key: 'initiativeId',
-            },
-        },
+
         taskStatus: {
             type: DataTypes.ENUM('Todo', 'Completed', 'WorkInProgress'),
             defaultValue: 'Todo',
@@ -52,12 +41,6 @@ module.exports = (sequelize, DataTypes) => {
     MemberTask.associate = (models) => {
         MemberTask.belongsTo(models.User, {
             foreignKey: 'userId',
-        });
-        MemberTask.belongsTo(models.Task, {
-            foreignKey: 'taskId',
-        });
-        MemberTask.belongsTo(models.Initiative, {
-            foreignKey: 'initiativeId',
         });
     };
 

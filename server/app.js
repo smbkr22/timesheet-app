@@ -9,8 +9,9 @@ const swaggerJsDoc = require('swagger-jsdoc');
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
 const userRouter = require('./routes/userRoutes');
-const taskRouter = require('./routes/taskRoutes');
 const initiativeRouter = require('./routes/initiativeRoutes');
+const taskRouter = require('./routes/taskRoutes');
+const initiativeTaskRouter = require('./routes/initiativeTaskRoutes');
 const clientRouter = require('./routes/clientRoutes');
 const roleRouter = require('./routes/roleRoutes');
 const initiativeMemberRouter = require('./routes/initiativeMemberRoutes');
@@ -73,8 +74,9 @@ app.use((req, res, next) => {
 
 app.get('/api/v1/refresh', require('./controllers/authController').isLoggedIn);
 app.use('/api/v1/users', userRouter);
-app.use('/api/v1/tasks', taskRouter);
 app.use('/api/v1/initiatives', initiativeRouter);
+app.use('/api/v1/tasks', taskRouter);
+app.use('/api/v1/initiativeTasks', initiativeTaskRouter);
 app.use('/api/v1/clients', clientRouter);
 app.use('/api/v1/roles', roleRouter);
 app.use('/api/v1/initiativeMembers', initiativeMemberRouter);

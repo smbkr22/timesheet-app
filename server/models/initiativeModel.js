@@ -25,18 +25,16 @@ module.exports = (sequelize, DataTypes) => {
         Initiative.belongsTo(models.Role, {
             foreignKey: 'roleId',
         });
-        Initiative.hasMany(models.Task, {
-            onDelete: 'cascade',
-            foreignKey: 'initiativeId',
-        });
         Initiative.belongsToMany(models.Task, {
             through: 'InitiativeTask',
             foreignKey: 'initiativeId',
+            onDelete: 'CASCADE',
         });
-        // Initiative.belongsToMany(models.User, {
-        //     through: 'InitiativeMember',
-        //     foreignKey: 'initiativeId',
-        // });
+        Initiative.belongsToMany(models.User, {
+            through: 'InitiativeMember',
+            foreignKey: 'initiativeId',
+            onDelete: 'CASCADE',
+        });
         // Initiative.belongsToMany(models.User, {
         //     through: 'MemberTask',
         //     foreignKey: 'initiativeId',

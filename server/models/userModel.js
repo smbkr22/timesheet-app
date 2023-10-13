@@ -78,10 +78,11 @@ module.exports = (sequelize, DataTypes) => {
             through: 'UserRole',
             foreignKey: 'userId',
         });
-        // User.belongsToMany(models.Initiative, {
-        //     through: 'InitiativeMember',
-        //     foreignKey: 'userId',
-        // });
+        User.belongsToMany(models.Initiative, {
+            through: 'InitiativeMember',
+            foreignKey: 'userId',
+            onDelete: 'CASCADE',
+        });
         // User.belongsToMany(models.Initiative, {
         //     through: 'MemberTask',
         //     foreignKey: 'userId',

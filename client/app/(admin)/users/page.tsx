@@ -15,7 +15,7 @@ import RegisterUser from "@/components/forms/register-user-form";
 import { Icons } from "@/components/icons";
 
 const fetchAllUsers = async (auth) => {
-  const { data } = await axios.get("/users?role=user", {
+  const { data } = await axios.get("/users", {
     headers: { Authorization: `Bearer ${auth?.token}` },
   });
 
@@ -26,7 +26,7 @@ const Users = () => {
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
   const { auth } = useAuth();
-  const { data } = useQuery(["GET-USERS"], () => fetchAllUsers(auth), {
+  const { data } = useQuery(["GET-ALL-USERS"], () => fetchAllUsers(auth), {
     select: (data) => data.data.users,
   });
 
@@ -67,27 +67,29 @@ const Users = () => {
           </DialogContent>
         </Dialog>
       </div>
-      <div className="grid gap-4 grid-cols-[repeat(auto-fit,minmax(384px,1fr))]">
-        {/* <pre className="break-words whitespace-break-spaces">
-          {JSON.stringify(data)}
-        </pre> */}
+      <div className="grid gap-4 justify-center grid-cols-[repeat(auto-fit,minmax(384px,420px))]">
         {data?.map((user: UserInfo) => {
           const startDate = moment(user.startDate);
           const endDate = moment(user.endDate);
 
           return (
-            <Card key={user.userId}>
-              <CardHeader className="grid grid-cols-[auto,1fr] gap-4 items-center">
-                <Icons.userCircle2 size={60} />
-                <div>
-                  <h2 className="capitalize">
+            <Card
+              key={user.userId}
+              className="p-8 transition-all hover:bg-accent hover:cursor-pointer"
+            >
+              <p className="font-mono text-xl uppercase">
+                {user.Roles[0].roleName}
+              </p>
+              <CardHeader className="flex flex-col items-center justify-center">
+                <Icons.userCircle2 size={82} />
+                <div className="text-center">
+                  <h2 className="text-xl font-semibold capitalize">
                     {user.firstName} {user.lastName}
                   </h2>
                   <p>{user.email}</p>
-                  <p className="capitalize">{user.Roles[0].roleName}</p>
                 </div>
               </CardHeader>
-              <CardFooter className="flex justify-between text-lg">
+              <CardFooter className="flex justify-between p-0 text-lg">
                 <p>{startDate.format("MMM - YYYY")}</p>
                 <p>{endDate.format("MMM - YYYY")}</p>
               </CardFooter>

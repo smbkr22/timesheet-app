@@ -45,18 +45,36 @@ module.exports = (sequelize, DataTypes) => {
         });
     };
 
-    // InitiativeMember.beforeCreate(async (initiativeMember) => {
-    //     try {
-    //         const now = new Date();
-    //         const sixMonthsLater = new Date(now);
-    //         sixMonthsLater.setMonth(now.getMonth() + 6);
+    InitiativeMember.checkAndAssignNewInitiative = async (
+        userId,
+        initiativeId,
+        startDate
+    ) => {
+        try {
+            const previousInitiative = await InitiativeMember.findOne({
+                where: {
+                    userId: userId,
+                },
+                order: [['startDate', 'DESC']],
+            });
 
-    //         initiativeMember.startDate = now;
-    //         initiativeMember.endDate = sixMonthsLater;
-    //     } catch (error) {
-    //         console.error('Error in beforeCreate hook:', error);
-    //     }
-    // });
+            if (previousInitiative) {
+                previousInitiative.endDate = startDate;
+                await previousInitiative.save();
+            }
+
+            const newInitiative = await InitiativeMember.create({
+                userId: userId,
+                initiativeId: initiativeId,
+                startDate: startDate,
+            });
+
+            return newInitiative;
+        } catch (error) {
+            console.error('Error in checkAndAssignNewInitiative:', error);
+            throw error;
+        }
+    };
 
     return InitiativeMember;
 };

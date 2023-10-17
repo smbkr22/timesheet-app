@@ -4,6 +4,7 @@ import axios from "@/api/axios";
 import { UserInfo } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import moment from "moment";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
@@ -44,6 +45,7 @@ const formSchema = z.object({
     message: "Initiative Description must be at least 10 characters.",
   }),
   userId: z.string({ required_error: "Manager name is required" }),
+  startDate: z.string(),
 });
 
 const AddInitiativeForm = ({ afterSave }: { afterSave: () => void }) => {
@@ -60,17 +62,18 @@ const AddInitiativeForm = ({ afterSave }: { afterSave: () => void }) => {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      initiativeName: "",
-      initiativeDescription: "",
-      userId: "",
-    },
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    const response = await axios.post("/initiatives", values, {
-      headers: { Authorization: `Bearer ${auth?.token}` },
-    });
+    const date = moment(values.startDate);
+
+    const response = await axios.post(
+      "/initiatives",
+      { ...values, startDate: date.format() },
+      {
+        headers: { Authorization: `Bearer ${auth?.token}` },
+      }
+    );
 
     if (response.status === 201) {
       toast("New Initiative Created");
@@ -118,16 +121,7 @@ const AddInitiativeForm = ({ afterSave }: { afterSave: () => void }) => {
             <FormItem>
               <FormLabel className="block mb-2">Select Manager</FormLabel>
               <FormControl className="w-full">
-                {/* <SearchSelect
-                  selectItems={data ?? []}
-                  fieldName="manager"
-                  className="z-[999999]"
-                  {...field}
-                /> */}
-                <Select
-                  onValueChange={field.onChange}
-                  // defaultValue={field.value}
-                >
+                <Select onValueChange={field.onChange}>
                   <SelectTrigger className="capitalize">
                     <SelectValue placeholder="selectManager..." />
                   </SelectTrigger>
@@ -139,10 +133,24 @@ const AddInitiativeForm = ({ afterSave }: { afterSave: () => void }) => {
                               {data.label}
                             </SelectItem>
                           ))
-                        : null}
+                        : "No managers found"}
                     </SelectGroup>
                   </SelectContent>
                 </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="startDate"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Start Date</FormLabel>
+              <FormControl>
+                <Input placeholder="startDate..." type="date" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

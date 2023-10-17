@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
+import moment from "moment";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -42,7 +43,7 @@ const formSchema = z.object({
   }),
 });
 
-const fetchAllUsers = async (auth: any) => {
+const fetchAllUsers = async () => {
   const { data } = await axios.get("/users?role=user");
 
   return data;
@@ -51,18 +52,23 @@ const fetchAllUsers = async (auth: any) => {
 type UserInitiativeEndDateForm = {
   initiativeName: string;
   initiativeId: string;
+  afterSave: () => void;
 };
 
 const UserInitiativeEndDateForm = (props: UserInitiativeEndDateForm) => {
-  const { initiativeId, initiativeName } = props;
+  const { initiativeId, initiativeName, afterSave } = props;
   const { auth } = useAuth();
-  const { data: users } = useQuery(["GET-USERS"], () => fetchAllUsers(auth), {
-    select: (data) =>
-      data.data.users.map((user: UserInfo) => ({
-        label: `${user.firstName} ${user.lastName}`,
-        value: user.userId,
-      })),
-  });
+  const { data: users } = useQuery(
+    ["GET-ALL-ONLY-USERS"],
+    () => fetchAllUsers(),
+    {
+      select: (data) =>
+        data.data.users.map((user: UserInfo) => ({
+          label: `${user.firstName} ${user.lastName}`,
+          value: user.userId,
+        })),
+    }
+  );
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -70,7 +76,17 @@ const UserInitiativeEndDateForm = (props: UserInitiativeEndDateForm) => {
   });
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log(values);
+    const startDate = moment(values.startDate);
+    const endDate = moment(values.endDate);
+    const req = {
+      ...values,
+      startDate: startDate.format(),
+      endDate: endDate.format(),
+    };
+
+    console.log(req);
+
+    afterSave();
   };
 
   return (

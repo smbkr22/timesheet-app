@@ -144,4 +144,8 @@ router
     .route('/users/tasks')
     .get(authController.protect, memberTaskController.getTasksByMemberTasks);
 
+router
+    .route('/users/infos')
+    .get(authController.protect, memberTaskController.getAllMemberTasksInfo);
+
 module.exports = router;

@@ -47,7 +47,12 @@ exports.getInitiativeMemberByInitiative = catchAsync(async (req, res, next) => {
 });
 
 exports.createInitiativeMember = catchAsync(async (req, res, next) => {
-    const initiativeMember = await InitiativeMember.create(req.body);
+    const { userId, initiativeId, startDate } = req.body;
+    const initiativeMember = await InitiativeMember.checkAndAssignNewInitiative(
+        userId,
+        initiativeId,
+        startDate
+    );
 
     res.status(201).json({
         status: 'success',

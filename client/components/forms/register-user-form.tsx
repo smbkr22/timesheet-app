@@ -36,7 +36,7 @@ const RegisterUser = (props: RegisterUserProps) => {
 
     if (response.status === 201) {
       toast("New User was Created");
-      queryClient.invalidateQueries(["GET-USERS"]);
+      queryClient.invalidateQueries(["GET-ALL-USERS"]);
     }
     reset();
     afterSave();

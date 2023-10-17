@@ -121,8 +121,9 @@ const fetchManager = async (initiativeId: string) => {
 };
 
 const GetManagerName = ({ initiativeId }: { initiativeId: string }) => {
-  const { data: managers } = useQuery(["GET-USER", initiativeId], () =>
-    fetchManager(initiativeId)
+  const { data: managers } = useQuery(
+    ["GET-INITIATIVE-MANAGER", initiativeId],
+    () => fetchManager(initiativeId)
   );
 
   return (

@@ -135,16 +135,58 @@ exports.getTasksByMemberTasks = catchAsync(async (req, res, next) => {
     });
 });
 
+exports.getAllMemberTasksInfo = catchAsync(async (req, res, next) => {
+    const memberUsers = await MemberTask.findAll();
+
+    const initiativeTasks = await Promise.all(
+        memberUsers.map(async ({ initiativeTaskId }) => {
+            const initiativeTask = await InitiativeTask.findByPk(
+                initiativeTaskId
+            );
+
+            return initiativeTask;
+        })
+    );
+
+    const initiatives = await Promise.all(
+        initiativeTasks.map(async ({ initiativeId }) => {
+            const initiative = await Initiative.findByPk(initiativeId);
+
+            return initiative;
+        })
+    );
+
+    const uniqueInitiatives = initiatives.filter((initiative, index, self) => {
+        const firstOccurrenceIndex = self.findIndex(
+            (item) => item.initiativeId === initiative.initiativeId
+        );
+
+        return index === firstOccurrenceIndex;
+    });
+
+    console.log(uniqueInitiatives);
+
+    res.json(uniqueInitiatives);
+});
+
 exports.createMemberTask = catchAsync(async (req, res, next) => {
     const initiativeTasks = await InitiativeTask.findAll({
         where: { initiativeId: req.body.initiativeId },
     });
+
+    if (!initiativeTasks) {
+        return next(
+            'No Task has been assigned for this initiative. Please assign a task',
+            401
+        );
+    }
 
     const newMemberTasks = await Promise.all(
         initiativeTasks.map(async ({ initiativeTaskId }) => {
             const newMemberTask = await MemberTask.create({
                 initiativeTaskId: initiativeTaskId,
                 userId: req.body.userId,
+                startDate: req.body.startDate,
             });
 
             return newMemberTask;

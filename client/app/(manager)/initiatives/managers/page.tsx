@@ -36,8 +36,9 @@ const ManagerInitiatives = () => {
   const [selectedInitiativeName, setSelectedInitiativeName] = useState("");
   const { auth } = useAuth();
   const router = useRouter();
-  const { data: initiatives } = useQuery(["GET-MANAGER-INITIATIVES"], () =>
-    fetchManagerInitiative(auth)
+  const { data: managerInitiatives } = useQuery(
+    ["GET-MANAGER-INITIATIVES"],
+    () => fetchManagerInitiative(auth)
   );
 
   return (
@@ -45,12 +46,13 @@ const ManagerInitiatives = () => {
       <h2 className="text-3xl">All Initiatives</h2>
 
       <div className="grid gap-8 grid-cols-[repeat(auto-fit,minmax(600px,1fr))]">
-        {initiatives?.data.initiatives.map((initiative: Initiative) => {
-          const createdDate = moment(initiative.createdAt);
+        {managerInitiatives?.data.initiativeMembers.map((member) => {
+          const startDate = moment(member.startDate);
+          const endDate = member.endDate ? moment(member.endDate) : null;
 
           return (
             <Card
-              key={initiative.initiativeId}
+              key={member.Initiative.initiativeId}
               className="grid content-between"
             >
               <CardHeader>
@@ -61,21 +63,21 @@ const ManagerInitiatives = () => {
                   value={accordionState}
                   onValueChange={setAccordionState}
                 >
-                  <AccordionItem value={initiative.initiativeName}>
+                  <AccordionItem value={member.Initiative.initiativeName}>
                     <div className="grid grid-cols-[1fr,auto,auto] gap-4 items-center">
                       <AccordionTrigger
                         onClick={() =>
-                          setAccordionState(initiative.initiativeName)
+                          setAccordionState(member.Initiative.initiativeName)
                         }
                       >
                         <CardTitle className="text-2xl tracking-wide uppercase">
-                          {initiative.initiativeName}
+                          {member.Initiative.initiativeName}
                         </CardTitle>
                       </AccordionTrigger>
                       <Button
                         onClick={() =>
                           router.push(
-                            `/assign-users?initiativeId=${initiative.initiativeId}&initiativeName=${initiative.initiativeName}`
+                            `/assign-users?initiativeId=${member.Initiative.initiativeId}&initiativeName=${member.Initiative.initiativeName}`
                           )
                         }
                         variant={"outline"}
@@ -86,9 +88,11 @@ const ManagerInitiatives = () => {
                         <DialogTrigger
                           onClick={() => {
                             setSelectedInitiativeName(
-                              initiative.initiativeName
+                              member.Initiative.initiativeName
                             );
-                            setSelectedInitiativeId(initiative.initiativeId);
+                            setSelectedInitiativeId(
+                              member.Initiative.initiativeId
+                            );
                           }}
                           className={buttonVariants({
                             variant: "default",
@@ -107,22 +111,32 @@ const ManagerInitiatives = () => {
                       </Dialog>
                     </div>
                     <AccordionContent className="absolute z-50 p-4 pb-0 text-lg rounded-lg bg-secondary">
-                      {initiative.initiativeDescription}
+                      {member.Initiative.initiativeDescription}
                     </AccordionContent>
                   </AccordionItem>
                 </Accordion>
               </CardHeader>
               <CardFooter className="flex justify-between">
-                <div className="flex gap-2">
-                  <Icons.calendar />
-
-                  <p className="text-lg font-medium">
-                    {createdDate.format("MMM - DD")}
-                  </p>
+                <div className="flex gap-4">
+                  <div className="flex gap-2">
+                    <Icons.calendar />
+                    <p className="font-medium">
+                      {startDate.format("MMM - DD")}
+                    </p>
+                  </div>
+                  <span>-</span>
+                  <div className="flex gap-2">
+                    <Icons.calendar />
+                    <p className="font-medium">
+                      {endDate?.format("MMM - DD") ?? "Now"}
+                    </p>
+                  </div>
                 </div>
                 <div className="flex gap-2">
                   <Icons.user2 />
-                  <h3 className="text-lg capitalize">{initiative.createdBy}</h3>
+                  <h3 className="text-lg capitalize">
+                    {member.Initiative.createdBy}
+                  </h3>
                 </div>
               </CardFooter>
             </Card>

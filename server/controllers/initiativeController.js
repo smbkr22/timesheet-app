@@ -22,24 +22,25 @@ exports.getInitiativesByRole = catchAsync(async (req, res, next) => {
 exports.getInitiativesByUser = catchAsync(async (req, res, next) => {
     const userId = req.params.id;
 
-    const initiativeMember = await InitiativeMember.findAll({
+    const initiativeMembers = await InitiativeMember.findAll({
         where: { userId: userId },
+        include: ['Initiative'],
     });
 
-    const initiatives = await Promise.all(
-        initiativeMember.map(async (member) => {
-            const initiatives = await Initiative.findAll({
-                where: { initiativeId: member.initiativeId },
-            });
-            return initiatives[0];
-        })
-    );
+    // const initiatives = await Promise.all(
+    //     initiativeMembers.map(async (member) => {
+    //         const initiative = await Initiative.findAll({
+    //             where: { initiativeId: member.initiativeId },
+    //         });
+    //         return initiative;
+    //     })
+    // );
 
     res.status(200).json({
         status: 'success',
-        results: initiatives.length,
+        results: initiativeMembers.length,
         data: {
-            initiatives,
+            initiativeMembers,
         },
     });
 });
@@ -54,10 +55,12 @@ exports.createInitiative = catchAsync(async (req, res, next) => {
         roleId: role[0].dataValues.roleId,
     });
 
-    await InitiativeMember.create({
-        initiativeId: initiative.initiativeId,
-        userId: req.body.userId,
-    });
+    const { userId, startDate } = req.body;
+    const initiativeMember = await InitiativeMember.checkAndAssignNewInitiative(
+        userId,
+        initiative.initiativeId,
+        startDate
+    );
 
     res.status(201).json({
         status: 'success',

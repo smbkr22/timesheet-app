@@ -44,5 +44,36 @@ module.exports = (sequelize, DataTypes) => {
         });
     };
 
+    MemberTask.checkAndAssignNewMemberTask = async (
+        userId,
+        initiativeTaskId,
+        startDate
+    ) => {
+        try {
+            const previousInitiative = await MemberTask.findOne({
+                where: {
+                    userId: userId,
+                },
+                order: [['startDate', 'DESC']],
+            });
+
+            if (previousInitiative) {
+                previousInitiative.endDate = startDate;
+                await previousInitiative.save();
+            }
+
+            const newInitiative = await MemberTask.create({
+                userId: userId,
+                initiativeTaskId: initiativeTaskId,
+                startDate: startDate,
+            });
+
+            return newInitiative;
+        } catch (error) {
+            console.error('Error in checkAndAssignNewInitiative:', error);
+            throw error;
+        }
+    };
+
     return MemberTask;
 };

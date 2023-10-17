@@ -1,14 +1,13 @@
-import { useState } from "react";
 import axios from "@/api/axios";
 import { UserInfo } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import moment from "moment";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
-import { cn } from "@/lib/utils";
+import useAuth from "@/hooks/useAuth";
 import {
   Form,
   FormControl,
@@ -19,9 +18,7 @@ import {
 } from "@/components/ui/form";
 
 import { Button, buttonVariants } from "../ui/button";
-import { Calendar } from "../ui/calendar";
 import { Input } from "../ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import {
   Select,
   SelectContent,
@@ -31,9 +28,11 @@ import {
 } from "../ui/select";
 
 const formSchema = z.object({
-  userId: z.string(),
   initiativeId: z.string(),
-  startDate: z.date({
+  userId: z.string({
+    required_error: "A user is required.",
+  }),
+  startDate: z.string({
     required_error: "A start date is required.",
   }),
 });
@@ -47,29 +46,46 @@ const fetchAllUsers = async () => {
 type UserInitiativeStartDateFormProps = {
   initiativeId: string;
   initiativeName: string;
+  afterSave: () => void;
 };
 
 const UserInitiativeStartDateForm = (
   props: UserInitiativeStartDateFormProps
 ) => {
-  const { initiativeId, initiativeName } = props;
+  const { initiativeId, initiativeName, afterSave } = props;
 
-  const [open, setOpen] = useState(false);
-  const { data: users } = useQuery(["GET-ALL-USERS"], () => fetchAllUsers(), {
-    select: (data) =>
-      data.data.users.map((user: UserInfo) => ({
-        label: `${user.firstName} ${user.lastName}`,
-        value: user.userId,
-      })),
-  });
+  const { auth } = useAuth();
+  const { data: users } = useQuery(
+    ["GET-ALL-ONLY-USERS"],
+    () => fetchAllUsers(),
+    {
+      select: (data) =>
+        data.data.users.map((user: UserInfo) => ({
+          label: `${user.firstName} ${user.lastName}`,
+          value: user.userId,
+        })),
+    }
+  );
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { userId: initiativeId },
+    defaultValues: {
+      initiativeId,
+    },
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log(values);
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    const startDate = moment(values.startDate);
+    const req = { ...values, startDate: startDate.format() };
+    const res = await axios.post("/memberTasks", req, {
+      headers: { Authorization: `Bearer ${auth?.token}` },
+    });
+
+    // console.log(req);
+
+    if (res.status === 201) toast("New Member Task has been created");
+
+    afterSave();
   };
 
   return (
@@ -77,7 +93,7 @@ const UserInitiativeStartDateForm = (
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <FormField
           control={form.control}
-          name="userId"
+          name="initiativeId"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Initiative Name</FormLabel>
@@ -130,37 +146,7 @@ const UserInitiativeStartDateForm = (
             <FormItem className="flex flex-col">
               <FormLabel>Start Date</FormLabel>
               <FormControl>
-                <Popover open={open} onOpenChange={setOpen}>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-[240px] pl-3 text-left font-normal",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, "PPP")
-                        ) : (
-                          <span>Pick a date</span>
-                        )}
-                        <CalendarIcon className="w-4 h-4 ml-auto opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      disabled={(date) =>
-                        date > new Date() || date < new Date("1900-01-01")
-                      }
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
+                <Input placeholder="startDate..." type="date" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

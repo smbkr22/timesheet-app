@@ -1,7 +1,7 @@
 import axios from "@/api/axios";
 import { UserInfo } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import moment from "moment";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -55,6 +55,7 @@ const UserInitiativeStartDateForm = (
   const { initiativeId, initiativeName, afterSave } = props;
 
   const { auth } = useAuth();
+  const queryClient = useQueryClient();
   const { data: users } = useQuery(
     ["GET-ALL-ONLY-USERS"],
     () => fetchAllUsers(),
@@ -81,10 +82,9 @@ const UserInitiativeStartDateForm = (
       headers: { Authorization: `Bearer ${auth?.token}` },
     });
 
-    // console.log(req);
-
     if (res.status === 201) toast("New Member Task has been created");
 
+    queryClient.invalidateQueries(["GET-ALL-MEMBER-TASK-INFOS"]);
     afterSave();
   };
 
@@ -146,7 +146,12 @@ const UserInitiativeStartDateForm = (
             <FormItem className="flex flex-col">
               <FormLabel>Start Date</FormLabel>
               <FormControl>
-                <Input placeholder="startDate..." type="date" {...field} />
+                <Input
+                  placeholder="startDate..."
+                  type="date"
+                  {...field}
+                  onChange={field.onChange}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

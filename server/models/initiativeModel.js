@@ -28,12 +28,10 @@ module.exports = (sequelize, DataTypes) => {
         Initiative.belongsToMany(models.Task, {
             through: 'InitiativeTask',
             foreignKey: 'initiativeId',
-            onDelete: 'CASCADE',
         });
         Initiative.belongsToMany(models.User, {
             through: 'InitiativeMember',
             foreignKey: 'initiativeId',
-            onDelete: 'CASCADE',
         });
         // Initiative.belongsToMany(models.User, {
         //     through: 'MemberTask',

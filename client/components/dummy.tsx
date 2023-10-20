@@ -1,101 +1,77 @@
-"use client";
+import React, { useEffect, useState } from "react";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { CalendarIcon } from "@radix-ui/react-icons";
-import { format } from "date-fns";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
+function MemberTaskComponent() {
+  const [memberTaskData, setMemberTaskData] = useState([]);
 
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { toast } from "@/components/ui/use-toast";
+  useEffect(() => {
+    // Fetch MemberTask data
+    fetch("URL_TO_YOUR_API_ENDPOINT")
+      .then((response) => response.json())
+      .then(async (data) => {
+        if (data.status === "success") {
+          // Get an array of unique userIds
+          const userIds = [
+            ...new Set(data.data.memberTaskInfos.map((task) => task.userId)),
+          ];
 
-const FormSchema = z.object({
-  dob: z.date({
-    required_error: "A date of birth is required.",
-  }),
-});
+          // Fetch user information for each userId
+          const usersPromises = userIds.map((userId) => {
+            return fetch(`URL_TO_FETCH_USER_INFO/${userId}`)
+              .then((response) => response.json())
+              .then((userData) => {
+                // Combine user information with member task data
+                const memberTasksWithUserInfo = data.data.memberTaskInfos.map(
+                  (task) => {
+                    if (task.userId === userId) {
+                      return {
+                        ...task,
+                        userInfo: userData, // Add user information to the member task data
+                      };
+                    }
+                    return task;
+                  }
+                );
+                return memberTasksWithUserInfo;
+              });
+          });
 
-export function DatePickerForm() {
-  const form = useForm<z.infer<typeof FormSchema>>({
-    resolver: zodResolver(FormSchema),
-  });
+          // Wait for all user information fetch requests to complete
+          const memberTasksWithUser = await Promise.all(usersPromises);
 
-  function onSubmit(data: z.infer<typeof FormSchema>) {
-    toast({
-      title: "You submitted the following values:",
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
-  }
+          // Flatten the array
+          const flattenedMemberTasks = [].concat(...memberTasksWithUser);
+
+          setMemberTaskData(flattenedMemberTasks);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+      });
+  }, []);
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <FormField
-          control={form.control}
-          name="dob"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Date of birth</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "w-[240px] pl-3 text-left font-normal",
-                        !field.value && "text-muted-foreground"
-                      )}
-                    >
-                      {field.value ? (
-                        format(field.value, "PPP")
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={field.value}
-                    onSelect={field.onChange}
-                    disabled={(date) =>
-                      date > new Date() || date < new Date("1900-01-01")
-                    }
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-              <FormDescription>
-                Your date of birth is used to calculate your age.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button type="submit">Submit</Button>
-      </form>
-    </Form>
+    <div>
+      <h1>Member Tasks</h1>
+      <ul>
+        {memberTaskData.map((task, index) => (
+          <li key={index}>
+            <p>User ID: {task.userId}</p>
+            <p>Initiative ID: {task.initiativeId}</p>
+            <p>Start Date: {task.startDate}</p>
+            <p>End Date: {task.endDate}</p>
+            {task.userInfo && (
+              <div>
+                <p>User Information:</p>
+                <p>Name: {task.userInfo.name}</p>
+                <p>Email: {task.userInfo.email}</p>
+                {/* Add other user information properties as needed */}
+              </div>
+            )}
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
+
+export default MemberTaskComponent;

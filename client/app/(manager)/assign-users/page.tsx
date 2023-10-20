@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import axios from "@/api/axios";
 import { useQuery } from "@tanstack/react-query";
+import moment from "moment";
 
 import useAuth from "@/hooks/useAuth";
 import { buttonVariants } from "@/components/ui/button";
@@ -20,8 +21,8 @@ import UserInitiativeEndDateForm from "@/components/forms/user-initiative-end-da
 import UserInitiativeStartDateForm from "@/components/forms/user-initiative-start-date-form";
 import { Icons } from "@/components/icons";
 
-const fetchAllMemberTasks = async (auth: any) => {
-  const { data } = await axios.get("/memberTasks", {
+const fetchAllMemberTaskInfos = async (auth: any) => {
+  const { data } = await axios.get("/memberTasks/users/infos", {
     headers: { Authorization: `Bearer ${auth?.token}` },
   });
   return data;
@@ -34,11 +35,11 @@ const AssignUser = () => {
   const initiativeId = searchParams.get("initiativeId");
 
   const { auth } = useAuth();
-  const { data: memberTasks } = useQuery(["GET-ALL-MEMBER-TASKS"], () =>
-    fetchAllMemberTasks(auth)
+  const { data: memberTaskInfos } = useQuery(
+    ["GET-ALL-MEMBER-TASK-INFOS"],
+    () => fetchAllMemberTaskInfos(auth)
   );
 
-  console.log(memberTasks);
   return (
     <div className="container py-8 space-y-8">
       <div className="flex gap-4">
@@ -56,19 +57,6 @@ const AssignUser = () => {
             />
           </DialogContent>
         </Dialog>
-        <Dialog>
-          <DialogTrigger className={buttonVariants({ variant: "default" })}>
-            <Icons.userMinus />
-            &nbsp;Release User
-          </DialogTrigger>
-          <DialogContent>
-            <UserInitiativeEndDateForm
-              initiativeId={initiativeId}
-              initiativeName={initiativeName}
-              afterSave={() => setOpen(false)}
-            />
-          </DialogContent>
-        </Dialog>
       </div>
 
       <Table>
@@ -78,15 +66,42 @@ const AssignUser = () => {
             <TableHead>Initiative</TableHead>
             <TableHead>Start Date</TableHead>
             <TableHead>End Date</TableHead>
+            <TableHead>Action</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          <TableRow>
-            <TableCell></TableCell>
-            <TableCell></TableCell>
-            <TableCell></TableCell>
-            <TableCell></TableCell>
-          </TableRow>
+          {memberTaskInfos?.data.memberTaskInfos.map((info, i) => {
+            const startDate = moment(info.startDate);
+            const endDate = info.endDate ? moment(info.endDate) : null;
+
+            return (
+              <TableRow key={i} className="capitalize">
+                <TableCell>{info.userName}</TableCell>
+                <TableCell>{info.initiativeName}</TableCell>
+                <TableCell>{startDate.format("MMM - DD")}</TableCell>
+                <TableCell>{endDate?.format("MMM - DD") ?? "Now"}</TableCell>
+                <TableCell>
+                  <Dialog>
+                    <DialogTrigger
+                      className={buttonVariants({ variant: "ghost" })}
+                    >
+                      <Icons.userMinus size={22} />
+                    </DialogTrigger>
+                    <DialogContent>
+                      <UserInitiativeEndDateForm
+                        initiativeId={info.initiativeId}
+                        initiativeName={info.initiativeName}
+                        userId={info.userId}
+                        userName={info.userName}
+                        startDate={startDate.format("YYYY-MM-DD")}
+                        afterSave={() => setOpen(false)}
+                      />
+                    </DialogContent>
+                  </Dialog>
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     </div>

@@ -123,7 +123,8 @@ const router = express.Router();
 router
     .route('/')
     .get(authController.protect, memberTaskController.getAllMemberTasks)
-    .post(authController.protect, memberTaskController.createMemberTask);
+    .post(authController.protect, memberTaskController.createMemberTask)
+    .patch(authController.protect, memberTaskController.updateMemberTask);
 
 router
     .route('/:id')

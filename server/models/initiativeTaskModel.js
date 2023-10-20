@@ -12,13 +12,13 @@ module.exports = (sequelize, DataTypes) => {
             },
             initiativeId: {
                 type: DataTypes.UUID,
-                reference: {
+                references: {
                     model: Initiative,
                 },
             },
             taskId: {
                 type: DataTypes.UUID,
-                reference: {
+                references: {
                     model: Task,
                 },
             },
@@ -29,6 +29,12 @@ module.exports = (sequelize, DataTypes) => {
     InitiativeTask.associate = (models) => {
         InitiativeTask.hasMany(models.MemberTask, {
             foreignKey: 'initiativeTaskId',
+        });
+        InitiativeTask.belongsTo(models.Initiative, {
+            foreignKey: 'initiativeId',
+        });
+        InitiativeTask.belongsTo(models.Task, {
+            foreignKey: 'taskId',
         });
     };
 

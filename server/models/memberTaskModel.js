@@ -42,6 +42,9 @@ module.exports = (sequelize, DataTypes) => {
         MemberTask.belongsTo(models.User, {
             foreignKey: 'userId',
         });
+        MemberTask.belongsTo(models.InitiativeTask, {
+            foreignKey: 'initiativeTaskId',
+        });
     };
 
     MemberTask.checkAndAssignNewMemberTask = async (

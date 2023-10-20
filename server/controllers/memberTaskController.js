@@ -1,4 +1,10 @@
-const { MemberTask, Initiative, Task, InitiativeTask } = require('../models');
+const {
+    MemberTask,
+    Initiative,
+    Task,
+    InitiativeTask,
+    User,
+} = require('../models');
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
 
@@ -136,37 +142,47 @@ exports.getTasksByMemberTasks = catchAsync(async (req, res, next) => {
 });
 
 exports.getAllMemberTasksInfo = catchAsync(async (req, res, next) => {
-    const memberUsers = await MemberTask.findAll();
-
-    const initiativeTasks = await Promise.all(
-        memberUsers.map(async ({ initiativeTaskId }) => {
-            const initiativeTask = await InitiativeTask.findByPk(
-                initiativeTaskId
-            );
-
-            return initiativeTask;
-        })
-    );
-
-    const initiatives = await Promise.all(
-        initiativeTasks.map(async ({ initiativeId }) => {
-            const initiative = await Initiative.findByPk(initiativeId);
-
-            return initiative;
-        })
-    );
-
-    const uniqueInitiatives = initiatives.filter((initiative, index, self) => {
-        const firstOccurrenceIndex = self.findIndex(
-            (item) => item.initiativeId === initiative.initiativeId
-        );
-
-        return index === firstOccurrenceIndex;
+    const memberTasks = await MemberTask.findAll({
+        attributes: ['userId', 'startDate', 'endDate'],
+        include: [
+            {
+                model: InitiativeTask,
+                attributes: ['initiativeId'],
+                include: [
+                    {
+                        model: Initiative,
+                        attributes: ['initiativeName', 'initiativeId'],
+                    },
+                ],
+            },
+            {
+                model: User,
+                attributes: ['firstName', 'lastName', 'userId'],
+            },
+        ],
     });
 
-    console.log(uniqueInitiatives);
+    const formattedMemberTasks = memberTasks.map((task) => ({
+        userId: task.userId,
+        userName: `${task.User.firstName} ${task.User.lastName}`,
+        initiativeId: task.InitiativeTask.Initiative.initiativeId,
+        initiativeName: task.InitiativeTask.Initiative.initiativeName,
+        startDate: task.startDate,
+        endDate: task.endDate,
+    }));
 
-    res.json(uniqueInitiatives);
+    const uniqueFormattedMemberTasks = formattedMemberTasks.filter(
+        (task, index, self) =>
+            index ===
+            self.findIndex((t) => t.initiativeName === task.initiativeName)
+    );
+
+    res.status(200).json({
+        status: 'success',
+        data: {
+            memberTaskInfos: uniqueFormattedMemberTasks,
+        },
+    });
 });
 
 exports.createMemberTask = catchAsync(async (req, res, next) => {
@@ -184,8 +200,8 @@ exports.createMemberTask = catchAsync(async (req, res, next) => {
     const newMemberTasks = await Promise.all(
         initiativeTasks.map(async ({ initiativeTaskId }) => {
             const newMemberTask = await MemberTask.create({
-                initiativeTaskId: initiativeTaskId,
                 userId: req.body.userId,
+                initiativeTaskId: initiativeTaskId,
                 startDate: req.body.startDate,
             });
 
@@ -200,6 +216,53 @@ exports.createMemberTask = catchAsync(async (req, res, next) => {
             memberTasks: newMemberTasks,
         },
     });
+});
+
+exports.updateMemberTask = catchAsync(async (req, res, next) => {
+    const { userId, initiativeId, endDate } = req.body;
+
+    const initiativeTasks = await InitiativeTask.findAll({
+        where: { initiativeId },
+    });
+
+    if (!initiativeTasks.length) {
+        return next(
+            new AppError(
+                'InitiativeTask not found for the provided initiativeId.',
+                404
+            )
+        );
+    }
+
+    const updateResults = await Promise.all(
+        initiativeTasks.map(async (initiativeTask) => {
+            const updateResult = await MemberTask.update(
+                { endDate },
+                {
+                    where: {
+                        userId,
+                        initiativeTaskId: initiativeTask.initiativeTaskId,
+                    },
+                }
+            );
+
+            return updateResult;
+        })
+    );
+
+    const updated = updateResults.some((result) => result[0] > 0);
+
+    if (updated) {
+        return res.status(200).json({
+            status: 'success',
+            message: 'Member tasks updated successfully.',
+        });
+    } else {
+        return res.status(404).json({
+            status: 'error',
+            message: 'No matching member tasks found for the update.',
+        });
+    }
 });
 
 exports.deleteMemberTask = catchAsync(async (req, res, next) => {

@@ -29,7 +29,17 @@ const router = express.Router();
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/User'
+ *           properties:
+ *              email:
+ *               type: string
+ *               format: email
+ *               description: The user's email address
+ *              password:
+ *                type: string
+ *                description: The user's password
+ *            required:
+ *              - email
+ *              - password
  *     responses:
  *       200:
  *         description: OK

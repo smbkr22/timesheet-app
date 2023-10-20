@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import axios from "@/api/axios";
 import { Task } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,7 +21,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
+import { Icons } from "../icons";
 import { Checkbox } from "../ui/checkbox";
+import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
+import AddTaskForm from "./add-task-form";
 
 const formSchema = z.object({
   initiativeId: z.string(),
@@ -53,6 +57,7 @@ const fetchInitiativeTasksById = async (auth: any, id: string) => {
 const AddInitiativeTaskForm = (props: AddInitiativeTaskFormType) => {
   const { selectedInitiativeName, selectedInitiativeId, afterSave } = props;
 
+  const [open, setOpen] = useState(false);
   const { auth } = useAuth();
 
   const { data: initiativeTasks } = useQuery(
@@ -122,7 +127,23 @@ const AddInitiativeTaskForm = (props: AddInitiativeTaskFormType) => {
           name="taskId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-lg">Task Name</FormLabel>
+              <div className="flex items-center justify-between">
+                <FormLabel className="text-lg">Task Name</FormLabel>
+                <Dialog open={open} onOpenChange={setOpen}>
+                  <DialogTrigger
+                    className={buttonVariants({
+                      variant: "secondary",
+                      size: "icon",
+                      className: "!rounded-full",
+                    })}
+                  >
+                    <Icons.plus size={18} />
+                  </DialogTrigger>
+                  <DialogContent>
+                    <AddTaskForm afterSave={() => setOpen(false)} />
+                  </DialogContent>
+                </Dialog>
+              </div>
               <div className="flex flex-wrap gap-3">
                 {tasks?.length ? (
                   tasks?.map((task: { label: string; value: string }) => (

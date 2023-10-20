@@ -34,11 +34,6 @@ export const dashboardConfig: Record<Roles, SideBarNavItems[]> = {
       icon: "scrollText",
     },
     {
-      title: "tasks",
-      href: "/tasks",
-      icon: "clipboardList",
-    },
-    {
       title: "users",
       href: "/users",
       icon: "user2",
@@ -56,9 +51,9 @@ export const dashboardConfig: Record<Roles, SideBarNavItems[]> = {
       icon: "scrollText",
     },
     {
-      title: "tasks",
-      href: "/tasks",
-      icon: "clipboardList",
+      title: "approval",
+      href: "/approval",
+      icon: "scrollText",
     },
   ],
 };

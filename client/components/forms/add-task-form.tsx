@@ -1,9 +1,8 @@
 "use client";
 
 import axios from "@/api/axios";
-import { UserInfo } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
@@ -19,14 +18,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 import { Textarea } from "../ui/textarea";
 
@@ -106,7 +97,7 @@ const AddTaskForm = ({ afterSave }: { afterSave: () => void }) => {
             Reset
           </Button>
           <Button type="submit" disabled={form.formState.isSubmitting}>
-            Submit
+            Create
           </Button>
         </div>
       </form>

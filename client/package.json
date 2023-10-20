@@ -42,6 +42,7 @@
     "react-day-picker": "^8.8.2",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.45.4",
+    "react-ripples": "^2.2.1",
     "react-time-picker": "^6.5.0",
     "react-transition-group": "^4.4.5",
     "react-uuid": "^2.0.0",

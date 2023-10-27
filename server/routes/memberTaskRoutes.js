@@ -80,6 +80,25 @@ const router = express.Router();
  *               type: array
  *               items:
  *                 $ref: "#/components/schemas/MemberTasks"
+ *   post:
+ *     tags:
+ *       - MemberTasks
+ *     summary: Create a new MemberTask
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/MemberTask'
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       201:
+ *         description: Created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/MemberTask'
  */
 
 /**
@@ -132,7 +151,8 @@ router
 
 router
     .route('/users')
-    .get(authController.protect, memberTaskController.getMemberTasksByUser);
+    .get(authController.protect, memberTaskController.getMemberTasksByUser)
+    .post(authController.protect, memberTaskController.createMemberTaskByUser);
 
 /* LOGGED IN USER */
 router

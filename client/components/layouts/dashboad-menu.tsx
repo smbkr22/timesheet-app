@@ -18,7 +18,7 @@ const DashboardMenu = () => {
   return (
     <AnimatePresence>
       <motion.div
-        className="absolute top-0 left-0 h-screen w-80 bg-accent"
+        className="absolute top-0 left-0 h-screen w-80 bg-secondary text-secondary-foreground"
         initial={{ opacity: 0, x: -100 }}
         animate={{ opacity: 1, x: 0 }}
         exit={{ opacity: 0, x: -100 }}

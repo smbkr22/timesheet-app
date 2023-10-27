@@ -39,7 +39,7 @@ const WeeklyLogTable = (props: WeeklyLogTableProps) => {
   const { auth } = useAuth();
 
   const [submitClicked, setSubmitClicked] = useState(false);
-  const [rows, setRows] = useState<WeeklyTableRow[]>([]);
+  const [rows, setRows] = useState<WeeklyTableRow[]>(memberTasks);
   const [newRow, setNewRow] = useState<WeeklyTableRow>({
     createdAt: weekFirstDate,
     memberTaskId: uuid(),
@@ -60,6 +60,7 @@ const WeeklyLogTable = (props: WeeklyLogTableProps) => {
   useEffect(() => {
     setRows(memberTasks);
   }, [memberTasks, weekFirstDate]);
+
   useEffect(() => {
     setNewRow({
       createdAt: weekFirstDate,
@@ -141,9 +142,9 @@ const WeeklyLogTable = (props: WeeklyLogTableProps) => {
           }
         );
 
-        // if (deleteResponse.status !== 204) {
-        //   throw new Error("Failed to delete object from the server.");
-        // }
+        if (deleteResponse.status !== 204) {
+          throw new Error("Failed to delete object from the server.");
+        }
       }
 
       postSave(convertObjects(updatedRows));
@@ -158,15 +159,12 @@ const WeeklyLogTable = (props: WeeklyLogTableProps) => {
       memberTaskId: string;
       initiativeId: string;
       taskId: string;
-      description: string;
       workHours: string;
-      error: boolean;
-      isSaved: boolean;
     }[]
   ) => {
     const promises = data.map((row) => {
       return axios
-        .post("/memberTasks", row, {
+        .post("/memberTasks/users", row, {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${auth?.token}`,
@@ -178,9 +176,9 @@ const WeeklyLogTable = (props: WeeklyLogTableProps) => {
 
     try {
       await Promise.all(promises);
-      console.log("All requests completed successfully.");
+      toast.success("Tasks have been saved");
     } catch (error) {
-      console.error("One or more requests failed:", error);
+      toast.error("Something went wrong");
     }
   };
 
@@ -202,11 +200,8 @@ const WeeklyLogTable = (props: WeeklyLogTableProps) => {
             userId: string;
             initiativeId: string;
             taskId: string;
-            description: string;
             workHours: string;
             createdAt: string;
-            error: boolean;
-            isSaved: boolean;
           }[],
           day,
           index
@@ -222,10 +217,7 @@ const WeeklyLogTable = (props: WeeklyLogTableProps) => {
               userId: auth.user.userId,
               initiativeId: row.initiativeId,
               taskId: row.taskId,
-              description: "",
               workHours: row[day],
-              error: row.error,
-              isSaved: row.isSaved,
             });
           }
           return acc;
@@ -341,9 +333,7 @@ const WeeklyLogTable = (props: WeeklyLogTableProps) => {
     }
 
     const date = weekFirstDate.toISOString();
-    // deleteBeforeSave(date).then(() => {
-    //   postSave(convertObjects(updatedRows));
-    // });
+    deleteBeforeSave(date, updatedRows);
   };
 
   const calculateRowTotal = useCallback((row: WeeklyTableRow) => {
@@ -439,7 +429,7 @@ const WeeklyLogTable = (props: WeeklyLogTableProps) => {
       const endDate = new Date(startDate);
       endDate.setDate(endDate.getDate() + 6);
 
-      const filteredData = data.filter(
+      const filteredData = data?.data.memberTasks.filter(
         (item: {
           createdAt: Date;
           memberTaskId: string;
@@ -450,10 +440,13 @@ const WeeklyLogTable = (props: WeeklyLogTableProps) => {
           error: boolean;
           isSaved: boolean;
         }) => {
-          const itemDate = new Date(item.createdAt);
+          const itemDate = moment(item.createdAt);
+          const startMoment = moment(startDate);
+          const endMoment = moment(endDate);
+
           return (
-            itemDate >= startDate &&
-            itemDate <= endDate &&
+            itemDate.isSameOrAfter(startMoment, "day") &&
+            itemDate.isSameOrBefore(endMoment, "day") &&
             item.initiativeId === deleteTask.initiativeId &&
             item.taskId === deleteTask.taskId
           );
@@ -461,12 +454,19 @@ const WeeklyLogTable = (props: WeeklyLogTableProps) => {
       );
 
       for (const item of filteredData) {
-        const deleteResponse = await axios.delete(`/memberTasks/${item.id}`, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${auth?.token}`,
-          },
-        });
+        const deleteResponse = await axios.delete(
+          `/memberTasks/${item.memberTaskId}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${auth?.token}`,
+            },
+          }
+        );
+
+        if (deleteResponse.status !== 204) {
+          throw new Error("Failed to delete object from the server.");
+        }
       }
     } catch (error) {
       throw error;
@@ -489,13 +489,13 @@ const WeeklyLogTable = (props: WeeklyLogTableProps) => {
       .catch((error) => console.error("Error:", error));
   };
 
-  console.log("rows", rows);
+  // console.log("rows", rows);
 
   return (
     <form className="w-full">
       <Table>
         <TableHeader>
-          <TableRow className="[&>th]:font-semibold [&>th]:text-base">
+          <TableRow className="[&>th]:font-semibold [&>th]:text-base [&>th]:text-secondary-foreground">
             <TableHead className="w-[375px]">Initiative Name</TableHead>
             <TableHead className="w-[375px]">Task Name</TableHead>
             {daysOfWeek.map((day, i) => {

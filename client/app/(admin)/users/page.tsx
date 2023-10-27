@@ -52,6 +52,7 @@ const Users = () => {
           type="search"
           placeholder="searchUsers..."
           onChange={handleSearch}
+          className="bg-secondary text-secondary-foreground"
         />
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger
@@ -75,7 +76,7 @@ const Users = () => {
           return (
             <Card
               key={user.userId}
-              className="p-8 transition-all hover:bg-accent hover:cursor-pointer hover:scale-105"
+              className="p-8 transition-all bg-secondary text-secondary-foreground hover:bg-accent hover:cursor-pointer hover:scale-105"
             >
               <p className="font-mono text-xl uppercase">
                 {user.Roles[0].roleName}

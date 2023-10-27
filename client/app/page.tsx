@@ -5,7 +5,7 @@ export default function IndexPage() {
         <h2 className="text-3xl font-extrabold leading-tight tracking-tighter md:text-4xl">
           Track Your Work Hours
         </h2>
-        <p className="max-w-[700px] text-lg text-muted-foreground">
+        <p className="max-w-[700px] text-lg text-secondary-foreground">
           Say goodbye to tedious spreadsheets and complicated timekeeping
           methods. With Time Sheet, you can effortlessly log your work hours
           with just a few clicks. Our intuitive interface makes it easier than

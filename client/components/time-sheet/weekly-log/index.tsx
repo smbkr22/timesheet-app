@@ -208,8 +208,6 @@ const WeeklyLog = () => {
     getFilteredData();
   }, [getFilteredData, startDate, endDate]);
 
-  // console.log("filteredDate", filteredData);
-
   return (
     <div className="flex flex-col items-center justify-center gap-12 mt-8">
       <div className="grid items-center grid-cols-[auto,1fr,auto] w-96 gap-5">

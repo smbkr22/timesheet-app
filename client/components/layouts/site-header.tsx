@@ -49,7 +49,7 @@ export function SiteHeader() {
                 </Link> */}
                 <Link
                   className={buttonVariants({
-                    variant: "outline",
+                    variant: "secondary",
                   })}
                   href={"/signin"}
                 >

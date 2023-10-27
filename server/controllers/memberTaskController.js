@@ -218,6 +218,37 @@ exports.createMemberTask = catchAsync(async (req, res, next) => {
     });
 });
 
+exports.createMemberTaskByUser = catchAsync(async (req, res, next) => {
+    const { userId, initiativeId, taskId, workHours, createdAt } = req.body;
+
+    if (!workHours) {
+        return next('Please provide work hour', 401);
+    }
+
+    const initiativeTask = await InitiativeTask.findOne({
+        where: { initiativeId, taskId },
+    });
+
+    const user = await User.findByPk(userId);
+    if (!user) {
+        return next('No user in this id', 404);
+    }
+
+    const memberTask = await MemberTask.create({
+        userId: userId,
+        initiativeTaskId: initiativeTask.initiativeTaskId,
+        workHours: workHours,
+        createdAt: createdAt,
+    });
+
+    res.status(201).json({
+        status: 'success',
+        data: {
+            memberTask,
+        },
+    });
+});
+
 exports.updateMemberTask = catchAsync(async (req, res, next) => {
     const { userId, initiativeId, endDate } = req.body;
 

@@ -6,6 +6,32 @@ const router = express.Router();
 
 /**
  * @swagger
+ * components:
+ *  schemas:
+ *    Task:
+ *      type: object
+ *      properties:
+ *        taskId:
+ *          type: string
+ *          format: uuid
+ *          description: The unique identifier for the task.
+ *        taskName:
+ *          type: string
+ *          description: The name of the task.
+ *        taskDescription:
+ *          type: string
+ *          description: The description of the task.
+ *        createdBy:
+ *          type: string
+ *          description: The user who created the task.
+ *      required:
+ *        - taskName
+ *        - taskDescription
+ *        - createdBy
+ */
+
+/**
+ * @swagger
  * /tasks/initiatives/{id}:
  *   get:
  *     tags: [Tasks]
@@ -32,7 +58,8 @@ const router = express.Router();
  * @swagger
  * /tasks:
  *   get:
- *     tags: [Tasks]
+ *     tags:
+ *       - Tasks
  *     summary: Get all tasks
  *     security:
  *       - BearerAuth: []
@@ -46,15 +73,26 @@ const router = express.Router();
  *               items:
  *                 $ref: "#/components/schemas/Task"
  *   post:
- *     tags: [Tasks]
+ *     tags:
+ *       - Tasks
  *     summary: Create a new task
- *     parameters:
- *       - in: body
- *         name: task
- *         description: The task to create
- *         required: true
- *         schema:
- *           $ref: "#/components/schemas/Task"
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               taskName:
+ *                 type: string
+ *                 description: The name of the task.
+ *               taskDescription:
+ *                 type: string
+ *                 description: The description of the task.
+ *                 default: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Eligendi non quis exercitationem culpa nesciunt nihil aut nostrum explicabo reprehenderit optio amet ab temporibus asperiores quasi cupiditate. Voluptatum ducimus voluptates voluptas?'
+ *             required:
+ *               - taskName
+ *               - taskDescription
  *     security:
  *       - BearerAuth: []
  *     responses:

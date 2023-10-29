@@ -5,6 +5,23 @@ const router = express.Router();
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     Role:
+ *       type: object
+ *       properties:
+ *         roleId:
+ *           type: string
+ *           format: uuid
+ *           description: The unique identifier for the role.
+ *         roleName:
+ *           type: string
+ *           enum: [user, admin, manager]
+ *           description: The name of the role (enum value).
+ */
+
+/**
+ * @swagger
  * /roles:
  *   get:
  *     tags: [Roles]

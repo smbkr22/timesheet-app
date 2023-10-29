@@ -5,6 +5,22 @@ const router = express.Router();
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     Client:
+ *       type: object
+ *       properties:
+ *         clientId:
+ *           type: string
+ *           format: uuid
+ *           description: The unique identifier for the client.
+ *         clientName:
+ *           type: string
+ *           description: The name of the client.
+ */
+
+/**
+ * @swagger
  * /clients:
  *   get:
  *     tags: [Clients]

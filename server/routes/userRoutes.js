@@ -41,8 +41,8 @@ const router = express.Router();
  *        - lastName
  *        - email
  *        - contactNumber
- *        - password
- *        - passwordConfirm
+ *        - startDate
+ *        - endDate
  */
 
 /**
@@ -56,7 +56,42 @@ const router = express.Router();
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/User'
+ *             type: object
+ *             properties:
+ *               firstName:
+ *                 type: string
+ *                 description: The first name of the user.
+ *               lastName:
+ *                 type: string
+ *                 description: The last name of the user.
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: The email address of the user.
+ *                 default: "user@gmail.com"
+ *               contactNumber:
+ *                 type: string
+ *                 description: The contact number of the user.
+ *               password:
+ *                 type: string
+ *                 description: The password for the user.
+ *                 default: 'pass1234'
+ *               passwordConfirm:
+ *                 type: string
+ *                 description: The password confirmation for the user.
+ *                 default: 'pass1234'
+ *               role:
+ *                 type: string
+ *                 description: The role for the user.
+ *                 default: 'user'
+ *             required:
+ *               - firstName
+ *               - lastName
+ *               - email
+ *               - contactNumber
+ *               - password
+ *               - passwordConfirm
+ *               - role
  *     responses:
  *       201:
  *         description: Created
@@ -70,7 +105,20 @@ const router = express.Router();
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/User'
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: The email address of the user.
+ *                 default: 'user@gmail.com'
+ *               password:
+ *                 type: string
+ *                 description: The password for the user.
+ *                 default: 'pass1234'
+ *             required:
+ *               - email
+ *               - password
  *     responses:
  *       200:
  *         description: OK

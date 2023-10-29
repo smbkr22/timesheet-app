@@ -6,6 +6,32 @@ const router = express.Router();
 
 /**
  * @swagger
+ * components:
+ *  schemas:
+ *    Initiative:
+ *      type: object
+ *      properties:
+ *        initiativeId:
+ *          type: string
+ *          format: uuid
+ *          description: The unique identifier for the initiative.
+ *        initiativeName:
+ *          type: string
+ *          description: The name of the initiative.
+ *        initiativeDescription:
+ *          type: string
+ *          description: The description of the initiative.
+ *        createdBy:
+ *          type: string
+ *          description: The user who created the initiative.
+ *      required:
+ *        - initiativeName
+ *        - initiativeDescription
+ *        - createdBy
+ */
+
+/**
+ * @swagger
  * /initiatives:
  *   get:
  *     tags:
@@ -31,7 +57,27 @@ const router = express.Router();
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Initiative'
+ *             type: object
+ *             properties:
+ *               initiativeName:
+ *                 type: string
+ *                 description: The name of the initiative.
+ *               initiativeDescription:
+ *                 type: string
+ *                 description: The description of the initiative.
+ *                 default: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Eligendi non quis exercitationem culpa nesciunt nihil aut nostrum explicabo reprehenderit optio amet ab temporibus asperiores quasi cupiditate. Voluptatum ducimus voluptates voluptas?'
+ *               userId:
+ *                 type: string
+ *                 description: The userID of the manager initiating the request.
+ *               startDate:
+ *                 type: string
+ *                 format: date-time
+ *                 description: The start date and time of the initiative.
+ *             required:
+ *               - initiativeName
+ *               - initiativeDescription
+ *               - userId
+ *               - startDate
  *     security:
  *       - BearerAuth: []
  *     responses:

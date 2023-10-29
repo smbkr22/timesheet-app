@@ -11,9 +11,10 @@ import {
 import { CSSTransition } from "react-transition-group";
 
 import "react-big-calendar/lib/css/react-big-calendar.css";
+import axios from "@/api/axios";
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
 
+import useAuth from "@/hooks/useAuth";
 import useOutsideClick from "@/hooks/useOutsideClick";
 import Loader from "@/components/ui/loader";
 
@@ -23,7 +24,7 @@ interface TableRow {
   initiativeName: string;
   taskName: string;
   description: string;
-  workHour: string;
+  workHours: string;
   error: boolean;
   isSaved: boolean;
 }
@@ -36,7 +37,7 @@ interface MyEvents {
     initiativeName: string;
     taskName: string;
     description: string;
-    workHour: string;
+    workHours: string;
   };
 }
 
@@ -47,23 +48,23 @@ interface GroupedEvent {
 }
 
 const localizer = momentLocalizer(moment);
-const getPosts = () => {
-  return axios.get("http://localhost:8000/daily-log");
+const fetchAllMemberTasks = async (auth) => {
+  const { data } = await axios.get("/memberTasks", {
+    headers: { Authorization: `Bearer ${auth?.token}` },
+  });
+
+  return data;
 };
 const WeeklyLogCalendar = () => {
   const [events, setEvents] = useState<Event[]>([]);
+  const { auth } = useAuth();
   const { isFetched, isLoading, isError, data } = useQuery(
-    ["posts"],
-    getPosts,
-    {
-      onSuccess: () => {
-        getCurrentMonthEvents();
-      },
-    }
+    ["GET-MEMBER-TASKS"],
+    () => fetchAllMemberTasks(auth)
   );
 
   const myEventsList: MyEvents[] = useMemo(() => {
-    const eventData = data?.data.map((d: TableRow) => {
+    const eventData = data?.data?.memberTasks.map((d: TableRow) => {
       return {
         start: moment(d.createdAt).toDate(),
         end: moment(d.createdAt).toDate(),
@@ -71,8 +72,7 @@ const WeeklyLogCalendar = () => {
           createdAt: d.createdAt,
           initiativeName: d.initiativeName,
           taskName: d.taskName,
-          description: d.description,
-          workHour: d.workHour,
+          workHours: d.workHours,
         },
       };
     });
@@ -97,7 +97,7 @@ const WeeklyLogCalendar = () => {
     const leaveMinutes = filteredEvents
       .map((event) => {
         if (event.data.initiativeName === "Leave") {
-          return event.data.workHour;
+          return event.data.workHours;
         }
 
         return;
@@ -111,7 +111,7 @@ const WeeklyLogCalendar = () => {
     const holidayMinutes = filteredEvents
       .map((event) => {
         if (event.data.initiativeName === "Holiday") {
-          return event.data.workHour;
+          return event.data.workHours;
         }
 
         return;
@@ -123,7 +123,7 @@ const WeeklyLogCalendar = () => {
       }, 0);
 
     let totalMinutes = filteredEvents
-      .map((event) => event.data.workHour)
+      .map((event) => event.data.workHours)
       .filter((el) => el !== "")
       .reduce((total, time) => {
         const [hours, minutes] = time.split(":");
@@ -161,7 +161,7 @@ const WeeklyLogCalendar = () => {
     const groupedEvents: { [key: string]: GroupedEvent } = events.reduce(
       (acc, event) => {
         const eventDate = moment(event.start).format("YYYY-MM-DD");
-        const workHourArray = event.data.workHour.split(":");
+        const workHourArray = event.data.workHours.split(":");
         const workHourDuration = moment.duration({
           hours: parseInt(workHourArray[0], 10),
           minutes: parseInt(workHourArray[1], 10),
@@ -208,7 +208,7 @@ const WeeklyLogCalendar = () => {
   }, [myEventsList]);
 
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center p-16 ">
       {isLoading && (
         <div className="flex items-center justify-center gap-2 h-[calc(100vh-220px)]">
           <Loader />

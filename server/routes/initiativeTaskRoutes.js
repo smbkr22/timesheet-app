@@ -6,6 +6,27 @@ const router = express.Router();
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     InitiativeTask:
+ *       type: object
+ *       properties:
+ *         initiativeTaskId:
+ *           type: string
+ *           format: uuid
+ *           description: The unique identifier for the initiative task.
+ *         initiativeId:
+ *           type: string
+ *           format: uuid
+ *           description: The unique identifier of the associated initiative.
+ *         taskId:
+ *           type: string
+ *           format: uuid
+ *           description: The unique identifier of the associated task.
+ */
+
+/**
+ * @swagger
  * /initiativeTasks:
  *   get:
  *     tags:
@@ -31,7 +52,19 @@ const router = express.Router();
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/InitiativeTask'
+ *             type: object
+ *             properties:
+ *               initiativeId:
+ *                 type: string
+ *                 description: The initiativeID of the initiative.
+ *               taskId:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: The taskID of the task.
+ *             required:
+ *               - initiativeId
+ *               - taskId
  *     security:
  *       - BearerAuth: []
  *     responses:

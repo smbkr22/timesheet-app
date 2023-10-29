@@ -6,6 +6,39 @@ const router = express.Router();
 
 /**
  * @swagger
+ * components:
+ *  schemas:
+ *    InitiativeMember:
+ *      type: object
+ *      properties:
+ *        initiativeMemberId:
+ *          type: string
+ *          format: uuid
+ *          description: The unique identifier for the initiative member.
+ *        userId:
+ *          type: string
+ *          format: uuid
+ *          description: The unique identifier of the user.
+ *        initiativeId:
+ *          type: string
+ *          format: uuid
+ *          description: The unique identifier of the initiative.
+ *        startDate:
+ *          type: string
+ *          format: date-time
+ *          description: The start date and time of the initiative membership (in ISO 8601 format).
+ *        endDate:
+ *          type: string
+ *          format: date-time
+ *          description: The end date and time of the initiative membership (in ISO 8601 format).
+ *      required:
+ *        - userId
+ *        - initiativeId
+ *        - startDate
+ */
+
+/**
+ * @swagger
  * /initiativeMembers:
  *   get:
  *     tags:
@@ -31,7 +64,17 @@ const router = express.Router();
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/InitiativeMember'
+ *             type: object
+ *             properties:
+ *               initiativeId:
+ *                 type: string
+ *                 description: The ID of the initiative.
+ *               userId:
+ *                 type: string
+ *                 description: The userID of the manager initiating the request.
+ *             required:
+ *               - initiativeId
+ *               - userId
  *     security:
  *       - BearerAuth: []
  *     responses:

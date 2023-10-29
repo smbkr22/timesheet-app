@@ -6,6 +6,42 @@ const router = express.Router();
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     MemberTask:
+ *       type: object
+ *       properties:
+ *         memberTaskId:
+ *           type: string
+ *           format: uuid
+ *           description: The unique identifier for the member task.
+ *         userId:
+ *           type: string
+ *           format: uuid
+ *           description: The unique identifier of the user.
+ *         initiativeTaskId:
+ *           type: string
+ *           format: uuid
+ *           description: The unique identifier of the associated initiative task.
+ *         taskStatus:
+ *           type: string
+ *           enum: [Todo, Completed, WorkInProgress]
+ *           description: The status of the task (enum value).
+ *         startDate:
+ *           type: string
+ *           format: date-time
+ *           description: The start date and time of the member task (in ISO 8601 format).
+ *         endDate:
+ *           type: string
+ *           format: date-time
+ *           description: The end date and time of the member task (in ISO 8601 format).
+ *         workHours:
+ *           type: string
+ *           description: The number of work hours associated with the task.
+ */
+
+/**
+ * @swagger
  * /memberTasks:
  *   get:
  *     tags:
@@ -25,13 +61,28 @@ const router = express.Router();
  *   post:
  *     tags:
  *       - MemberTasks
- *     summary: Create a new MemberTask
+ *     summary: Assign a new MemberTask by Manager
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/MemberTask'
+ *             type: object
+ *             properties:
+ *               initiativeId:
+ *                 type: string
+ *                 description: The initiativeId of the initiative.
+ *               userId:
+ *                 type: string
+ *                 description: The userID of the manager initiating the request.
+ *               startDate:
+ *                 type: string
+ *                 format: date-time
+ *                 description: The start date and time of the initiative.
+ *             required:
+ *               - initiativeId
+ *               - userId
+ *               - startDate
  *     security:
  *       - BearerAuth: []
  *     responses:
@@ -68,7 +119,7 @@ const router = express.Router();
  * /memberTasks/users:
  *   get:
  *     tags: [MemberTasks]
- *     summary: Get Task by user
+ *     summary: Get All MemberTasks by loggedIn user
  *     security:
  *       - BearerAuth: []
  *     responses:

@@ -6,6 +6,47 @@ const router = express.Router();
 
 /**
  * @swagger
+ * components:
+ *  schemas:
+ *    User:
+ *      type: object
+ *      properties:
+ *        userId:
+ *          type: string
+ *          format: uuid
+ *          description: The unique identifier for the user.
+ *        firstName:
+ *          type: string
+ *          description: The first name of the user.
+ *        lastName:
+ *          type: string
+ *          description: The last name of the user.
+ *        email:
+ *          type: string
+ *          format: email
+ *          description: The email address of the user.
+ *        contactNumber:
+ *          type: string
+ *          description: The contact number of the user.
+ *        startDate:
+ *          type: string
+ *          format: date-time
+ *          description: The start date for the user.
+ *        endDate:
+ *          type: string
+ *          format: date-time
+ *          description: The end date for the user.
+ *      required:
+ *        - firstName
+ *        - lastName
+ *        - email
+ *        - contactNumber
+ *        - password
+ *        - passwordConfirm
+ */
+
+/**
+ * @swagger
  * /users/signup:
  *   post:
  *     summary: Create a new user
@@ -29,17 +70,7 @@ const router = express.Router();
  *       content:
  *         application/json:
  *           schema:
- *           properties:
- *              email:
- *               type: string
- *               format: email
- *               description: The user's email address
- *              password:
- *                type: string
- *                description: The user's password
- *            required:
- *              - email
- *              - password
+ *             $ref: '#/components/schemas/User'
  *     responses:
  *       200:
  *         description: OK

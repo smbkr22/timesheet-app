@@ -23,7 +23,7 @@ const DashboardMenu = () => {
         animate={{ opacity: 1, x: 0 }}
         exit={{ opacity: 0, x: -100 }}
         transition={{
-          ease: "linear",
+          ease: "easeInOut",
           duration: 0.2,
         }}
       >
@@ -37,7 +37,7 @@ const DashboardMenu = () => {
                     href={option.href}
                     className="flex items-center gap-3 px-10 py-4 capitalize cursor-pointer hover:bg-popover"
                   >
-                    {/* <LucideIcon /> */}
+                    <LucideIcon />
                     {option.title}
                   </Link>
                 </li>

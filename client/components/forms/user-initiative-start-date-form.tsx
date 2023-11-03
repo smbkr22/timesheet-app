@@ -77,6 +77,7 @@ const UserInitiativeStartDateForm = (
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const startDate = moment(values.startDate);
+
     const req = { ...values, startDate: startDate.format() };
     const res = await axios.post("/memberTasks", req, {
       headers: { Authorization: `Bearer ${auth?.token}` },

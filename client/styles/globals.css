@@ -1,6 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import "./calendar.css";
 
 /* @layer base {
   :root {
@@ -48,7 +49,6 @@
     --ring: 222 85% 60%;
   }
 } */
-
 @layer base {
   :root {
     --background: 210 80% 98%;

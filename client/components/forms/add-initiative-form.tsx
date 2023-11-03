@@ -128,7 +128,7 @@ const AddInitiativeForm = ({ afterSave }: { afterSave: () => void }) => {
                   <SelectContent className="capitalize">
                     <SelectGroup>
                       {data?.length
-                        ? data.map((data) => (
+                        ? data.map((data: { label: string; value: string }) => (
                             <SelectItem key={data.value} value={data.value}>
                               {data.label}
                             </SelectItem>

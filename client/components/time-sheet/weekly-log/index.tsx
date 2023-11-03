@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import axios from "@/api/axios";
 import { WeeklyTableRow } from "@/types";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import useAuth from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,7 @@ import { Icons } from "@/components/icons";
 import WeeklyLogTable from "./weekly-log-table";
 
 const fetchAllMemberTasks = async (auth) => {
-  const { data } = await axios.get("/memberTasks", {
+  const { data } = await axios.get(`/memberTasks/users`, {
     headers: { Authorization: `Bearer ${auth?.token}` },
   });
 
@@ -52,6 +52,8 @@ const WeeklyLog = () => {
   const { data: memberTasks, isLoading } = useQuery(["GET-MEMBER-TASKS"], () =>
     fetchAllMemberTasks(auth)
   );
+  const queryClient = useQueryClient();
+  if (auth === null) queryClient.removeQueries(["GET-MEMBER-TASKS"]);
 
   const getFilteredData = useCallback(() => {
     const res: {
@@ -59,7 +61,8 @@ const WeeklyLog = () => {
       memberTaskId: string;
       initiativeId: string;
       taskId: string;
-      description: string;
+      startDate: string;
+      endDate: string;
       workHours: string;
       error: boolean;
       isSaved: boolean;
@@ -74,6 +77,8 @@ const WeeklyLog = () => {
           memberTaskId: d.memberTaskId,
           initiativeId: d.initiativeId,
           taskId: d.taskId,
+          startDate: d.startDate,
+          endDate: d.endDate,
           mon: "",
           tues: "",
           wed: "",
@@ -206,7 +211,7 @@ const WeeklyLog = () => {
 
   useEffect(() => {
     getFilteredData();
-  }, [getFilteredData, startDate, endDate]);
+  }, [getFilteredData, startDate, endDate, memberTasks]);
 
   return (
     <div className="flex flex-col items-center justify-center gap-12 mt-8">

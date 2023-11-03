@@ -200,12 +200,13 @@ router
     .route('/:id')
     .delete(authController.protect, memberTaskController.deleteMemberTask);
 
+/* LOGGED IN USER */
+
 router
     .route('/users')
     .get(authController.protect, memberTaskController.getMemberTasksByUser)
     .post(authController.protect, memberTaskController.createMemberTaskByUser);
 
-/* LOGGED IN USER */
 router
     .route('/users/initiatives')
     .get(

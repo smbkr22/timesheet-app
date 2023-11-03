@@ -56,10 +56,43 @@ exports.getMemberTasksByUser = catchAsync(async (req, res, next) => {
         where: { userId: req.user.dataValues.userId },
     });
 
+    const initiativeTasks = await Promise.all(
+        memberTasks.map(async ({ initiativeTaskId }) => {
+            const initiativeTask = await InitiativeTask.findByPk(
+                initiativeTaskId
+            );
+            return initiativeTask;
+        })
+    );
+
+    const initiatives = await Promise.all(
+        initiativeTasks.map(async ({ initiativeId }) => {
+            const initiative = await Initiative.findByPk(initiativeId, {
+                attributes: ['initiativeId'],
+            });
+            return initiative;
+        })
+    );
+
+    const tasks = await Promise.all(
+        initiativeTasks.map(async ({ taskId }) => {
+            const task = await Task.findByPk(taskId, {
+                attributes: ['taskId'],
+            });
+            return task;
+        })
+    );
+
+    const mergedData = memberTasks.map((memberTask, index) => ({
+        ...memberTask.dataValues,
+        initiativeId: initiatives[index].dataValues.initiativeId,
+        taskId: tasks[index].dataValues.taskId,
+    }));
+
     res.status(200).json({
         status: 'success',
-        result: memberTasks.length,
-        data: { memberTasks },
+        results: memberTasks.length,
+        data: { memberTasks: mergedData },
     });
 });
 

@@ -1,0 +1,96 @@
+.custom-calendar * {
+  @apply text-secondary-foreground;
+  border-color: var(--gray-border) !important;
+}
+
+.custom-calendar .rbc-toolbar {
+  @apply mb-10;
+}
+
+.custom-calendar .rbc-event-content {
+  position: relative !important;
+  overflow: visible !important;
+}
+.custom-calendar .rbc-month-row {
+  overflow: visible !important;
+}
+.custom-calendar .rbc-month-view[role="table"] {
+  border: none !important;
+}
+.custom-calendar .rbc-off-range-bg {
+  background: transparent;
+}
+.custom-calendar .rbc-row-content {
+  z-index: inherit;
+}
+.custom-calendar .rbc-today {
+  @apply bg-accent/10;
+}
+.custom-calendar .rbc-toolbar button {
+  color: inherit;
+}
+.custom-calendar .rbc-event:focus {
+  outline: none;
+}
+
+.custom-calendar .rbc-event,
+.custom-calendar .rbc-day-slot .rbc-background-event {
+  @apply bg-primary/80;
+}
+
+.custom-calendar .rbc-event.rbc-selected,
+.custom-calendar .rbc-day-slot .rbc-selected.rbc-background-event {
+  @apply bg-secondary/80;
+}
+.custom-calendar .rbc-toolbar button:active,
+.custom-calendar .rbc-toolbar button.rbc-active {
+  color: #373a3c !important;
+}
+.custom-calendar .rbc-day-slot .rbc-time-slot {
+  border-top: none !important;
+}
+.custom-calendar .rbc-agenda-event-cell p {
+  @apply !text-secondary-foreground;
+}
+.custom-calendar .rbc-day-slot .rbc-event-label {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.custom-calendar .rbc-day-slot .rbc-event,
+.custom-calendar .rbc-day-slot .rbc-background-event {
+  overflow: visible !important;
+}
+.custom-calendar .rbc-time-header.rbc-overflowing {
+  border-right: 1px solid transparent !important;
+}
+.custom-calendar .rbc-time-content {
+  border-top: 1px solid #808080;
+}
+.custom-calendar .rbc-label {
+  width: 77.6369px !important;
+  min-width: 73.6369px !important;
+  max-width: 77.6369px !important;
+}
+.custom-calendar .rbc-show-more {
+  color: #458eff !important;
+  background: transparent !important;
+  font-weight: normal !important;
+}
+.custom-calendar .rbc-event-label {
+  @apply text-primary-foreground;
+}
+.rbc-overlay {
+  padding: 1rem !important;
+  background-color: var(--background-popup) !important;
+  border-radius: 0.5rem;
+  border: none !important;
+}
+.custom-calendar .rbc-overlay-header {
+  @apply text-secondary-foreground;
+}
+
+.custom-calendar .rbc-event.rbc-event-continues-after {
+  @apply rounded-md bg-primary/80;
+}

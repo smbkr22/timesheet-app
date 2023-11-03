@@ -23,6 +23,8 @@ export type WeeklyTableRow = {
   memberTaskId: string;
   initiativeId: string;
   taskId: string;
+  startDate: string;
+  endDate: string;
   mon: string;
   tues: string;
   wed: string;
@@ -87,5 +89,4 @@ export type Task = {
   createdBy: string;
   createdAt: string;
   updatedAt: string;
-  initiativeId: string;
 };

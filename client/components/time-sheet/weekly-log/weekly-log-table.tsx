@@ -45,6 +45,8 @@ const WeeklyLogTable = (props: WeeklyLogTableProps) => {
     memberTaskId: uuid(),
     initiativeId: "",
     taskId: "",
+    startDate: "",
+    endDate: "",
     mon: "",
     tues: "",
     wed: "",
@@ -67,6 +69,8 @@ const WeeklyLogTable = (props: WeeklyLogTableProps) => {
       memberTaskId: uuid(),
       initiativeId: "",
       taskId: "",
+      startDate: "",
+      endDate: "",
       mon: "",
       tues: "",
       wed: "",
@@ -87,6 +91,8 @@ const WeeklyLogTable = (props: WeeklyLogTableProps) => {
       memberTaskId: uuid(),
       initiativeId: "",
       taskId: "",
+      startDate: "",
+      endDate: "",
       mon: "",
       tues: "",
       wed: "",
@@ -200,6 +206,8 @@ const WeeklyLogTable = (props: WeeklyLogTableProps) => {
             userId: string;
             initiativeId: string;
             taskId: string;
+            startDate: string;
+            endDate: string;
             workHours: string;
             createdAt: string;
           }[],
@@ -217,6 +225,8 @@ const WeeklyLogTable = (props: WeeklyLogTableProps) => {
               userId: auth.user.userId,
               initiativeId: row.initiativeId,
               taskId: row.taskId,
+              startDate: row.startDate,
+              endDate: row.endDate,
               workHours: row[day],
             });
           }
@@ -280,13 +290,11 @@ const WeeklyLogTable = (props: WeeklyLogTableProps) => {
 
     setRows(updatedRows);
 
-    // const rowsHasErrors = updatedRows.some((row) => row.error === true);
-    // if (!rowsHasErrors) {
-    //   toast.success("Saved Successfully!");
-    // } else {
-    //   toast.error("Error");
-    //   return;
-    // }
+    const rowsHasErrors = updatedRows.some((row) => row.error === true);
+    if (rowsHasErrors) {
+      toast.error("Please fill the days field");
+      return;
+    }
 
     const date = weekFirstDate.toISOString();
     deleteBeforeSave(date, updatedRows);
@@ -338,7 +346,7 @@ const WeeklyLogTable = (props: WeeklyLogTableProps) => {
 
   const calculateRowTotal = useCallback((row: WeeklyTableRow) => {
     const timeParts = Object.values(row)
-      .slice(4, 11)
+      .slice(6, 13)
       .map((time) => {
         if (time === "" || time === null) return "00:00";
         return time.split(":");
@@ -435,7 +443,8 @@ const WeeklyLogTable = (props: WeeklyLogTableProps) => {
           memberTaskId: string;
           initiativeId: string;
           taskId: string;
-          description: string;
+          startDate: string;
+          endDate: string;
           workHour: string;
           error: boolean;
           isSaved: boolean;

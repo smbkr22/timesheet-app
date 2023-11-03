@@ -68,6 +68,7 @@ const router = express.Router();
  *                 default: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Eligendi non quis exercitationem culpa nesciunt nihil aut nostrum explicabo reprehenderit optio amet ab temporibus asperiores quasi cupiditate. Voluptatum ducimus voluptates voluptas?'
  *               userId:
  *                 type: string
+ *                 format: uuid
  *                 description: The userID of the manager initiating the request.
  *               startDate:
  *                 type: string
